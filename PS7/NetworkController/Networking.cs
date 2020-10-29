@@ -22,9 +22,12 @@ namespace NetworkUtil {
         /// <param name="port">The the port to listen on</param>
         public static TcpListener StartServer(Action<SocketState> toCall, int port)
         {
+            // start tcpListener
             TcpListener listener = new TcpListener(IPAddress.Any, port);
             listener.Start();
+            // creates asyncResult
             Tuple<Action<SocketState>, TcpListener> tupleThing = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
+            //start event loop
             listener.BeginAcceptSocket(AcceptNewClient, tupleThing);
             return listener;
         }
@@ -49,19 +52,14 @@ namespace NetworkUtil {
         /// 1) a delegate so the user can take action (a SocketState Action), and 2) the TcpListener</param>
         private static void AcceptNewClient(IAsyncResult ar)
         {
-            ar.AsyncState.GetType();
+            // extract tuple from assyncResult
             Tuple<Action<SocketState>, TcpListener> tupleThing = (Tuple<Action<SocketState>, TcpListener>)ar.AsyncState;
-            Action<SocketState> callback = (Action<SocketState>)tupleThing.Item1;
-            TcpListener listener = (TcpListener)tupleThing.Item2;
-            try
-            {
-                SocketState newSocket = new SocketState(callback, listener.EndAcceptSocket(ar));
-            }
-            catch (Exception)
-            {
 
-            }
-            listener.BeginAcceptSocket(AcceptNewClient, tupleThing);
+            //create socketstate and ends socketstateacception
+            SocketState newSocket = new SocketState(tupleThing.Item1, tupleThing.Item2.EndAcceptSocket(ar));
+            newSocket.OnNetworkAction(newSocket);
+            tupleThing.Item2.BeginAcceptSocket(AcceptNewClient, tupleThing);
+
         }
 
         /// <summary>
@@ -141,6 +139,8 @@ namespace NetworkUtil {
             socket.NoDelay = true;
 
             // TODO: Finish the remainder of the connection process as specified.
+            SocketState newSocket = new SocketState(toCall, socket);
+            newSocket.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, newSocket);
         }
 
         /// <summary>
@@ -158,7 +158,11 @@ namespace NetworkUtil {
         /// <param name="ar">The object asynchronously passed via BeginConnect</param>
         private static void ConnectedCallback(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            SocketState newSocket = (SocketState)ar.AsyncState;
+            newSocket.TheSocket.EndConnect(ar);
+
+            //connection was established successfully
+            newSocket.OnNetworkAction(newSocket);
         }
 
 
@@ -180,7 +184,7 @@ namespace NetworkUtil {
         /// <param name="state">The SocketState to begin receiving</param>
         public static void GetData(SocketState state)
         {
-            throw new NotImplementedException();
+            state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
 
         /// <summary>
@@ -202,7 +206,15 @@ namespace NetworkUtil {
         /// </param>
         private static void ReceiveCallback(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            SocketState state = (SocketState)ar.AsyncState;
+            int numBytes = state.TheSocket.EndReceive(ar);
+            string data = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
+
+            //need to put the data into the socketstates stringbuilder in a thread-safe manner
+            state.data.Append(data);
+
+            //call saved delegate (onNetworkAction)
+            state.OnNetworkAction(state);
         }
 
         /// <summary>
@@ -217,7 +229,18 @@ namespace NetworkUtil {
         /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
         public static bool Send(Socket socket, string data)
         {
-            throw new NotImplementedException();
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            bool sent = true;
+            try
+            {
+                socket.BeginSend(dataBytes, 0, dataBytes.Length, SocketFlags.None, SendCallback, socket);
+                return sent;
+            }
+            catch (Exception)
+            {
+                sent = false;
+                return sent;
+            }
         }
 
         /// <summary>
@@ -233,7 +256,8 @@ namespace NetworkUtil {
         /// </param>
         private static void SendCallback(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            Socket socket = (Socket)ar.AsyncState;
+            socket.EndSend(ar);
         }
 
 
@@ -250,7 +274,18 @@ namespace NetworkUtil {
         /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
         public static bool SendAndClose(Socket socket, string data)
         {
-            throw new NotImplementedException();
+            byte[] dataBytes = Encoding.UTF8.GetBytes(data);
+            bool sent = true;
+            try
+            {
+                socket.BeginSend(dataBytes, 0, dataBytes.Length, SocketFlags.None, SendAndCloseCallback, socket);
+                return sent;
+            }
+            catch (Exception)
+            {
+                sent = false;
+                return sent;
+            }
         }
 
         /// <summary>
@@ -268,7 +303,9 @@ namespace NetworkUtil {
         /// </param>
         private static void SendAndCloseCallback(IAsyncResult ar)
         {
-            throw new NotImplementedException();
+            Socket socket = (Socket)ar.AsyncState;
+            socket.EndSend(ar);
+            socket.Close();
         }
 
     }
