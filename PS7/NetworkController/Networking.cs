@@ -60,6 +60,7 @@ namespace NetworkUtil {
             newSocket.OnNetworkAction(newSocket);
             tupleThing.Item2.BeginAcceptSocket(AcceptNewClient, tupleThing);
 
+
         }
 
         /// <summary>
