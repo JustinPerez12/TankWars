@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace NetworkUtil {
@@ -56,11 +57,24 @@ namespace NetworkUtil {
             Tuple<Action<SocketState>, TcpListener> tupleThing = (Tuple<Action<SocketState>, TcpListener>)ar.AsyncState;
 
             //create socketstate and ends socketstateacception
-            SocketState newSocket = new SocketState(tupleThing.Item1, tupleThing.Item2.EndAcceptSocket(ar));
-            newSocket.OnNetworkAction(newSocket);
-            tupleThing.Item2.BeginAcceptSocket(AcceptNewClient, tupleThing);
+            try
+            {
+                SocketState newSocketState = new SocketState(tupleThing.Item1, tupleThing.Item2.EndAcceptSocket(ar));
+                newSocketState.OnNetworkAction(newSocketState);
+                tupleThing.Item2.BeginAcceptSocket(AcceptNewClient, tupleThing);
+            }
+            catch (Exception e)
+            {
+                SocketState socketState = new SocketState(tupleThing.Item1, null);
+                setError(socketState, e.Message);
+            }
+        }
 
-
+        private static void setError(SocketState socketState, string message)
+        {
+            socketState.ErrorOccured = true;
+            socketState.ErrorMessage = message;
+            socketState.OnNetworkAction(socketState);
         }
 
         /// <summary>
@@ -208,14 +222,20 @@ namespace NetworkUtil {
         private static void ReceiveCallback(IAsyncResult ar)
         {
             SocketState state = (SocketState)ar.AsyncState;
-            int numBytes = state.TheSocket.EndReceive(ar);
-            string data = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
+            try
+            {
+                int numBytes = state.TheSocket.EndReceive(ar);
+                string data = Encoding.UTF8.GetString(state.buffer, 0, numBytes);
+                //need to put the data into the socketstates stringbuilder in a thread-safe manner
+                state.data.Append(data);
 
-            //need to put the data into the socketstates stringbuilder in a thread-safe manner
-            state.data.Append(data);
-
-            //call saved delegate (onNetworkAction)
-            state.OnNetworkAction(state);
+                //call saved delegate (onNetworkAction)
+                state.OnNetworkAction(state);
+            }
+            catch (Exception e)
+            {
+                setError(state, e.Message);
+            }
         }
 
         /// <summary>
