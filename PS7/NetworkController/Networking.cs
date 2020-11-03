@@ -199,6 +199,7 @@ namespace NetworkUtil {
         /// <param name="state">The SocketState to begin receiving</param>
         public static void GetData(SocketState state)
         {
+            //StringBuilder currentData = state.data;
             state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
         }
 
@@ -229,6 +230,12 @@ namespace NetworkUtil {
                 //need to put the data into the socketstates stringbuilder in a thread-safe manner
                 state.data.Append(data);
 
+                // detects client disconnection
+                if(data.Equals(""))
+                {
+                    setError(state, "closed client");
+                    return;
+                }
                 //call saved delegate (onNetworkAction)
                 state.OnNetworkAction(state);
             }
