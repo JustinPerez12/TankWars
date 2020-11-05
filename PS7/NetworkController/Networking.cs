@@ -28,7 +28,15 @@ namespace NetworkUtil {
             // creates asyncResult
             Tuple<Action<SocketState>, TcpListener> tupleThing = new Tuple<Action<SocketState>, TcpListener>(toCall, listener);
             //start event loop
-            listener.BeginAcceptSocket(AcceptNewClient, tupleThing);
+            try
+            {
+                listener.BeginAcceptSocket(AcceptNewClient, tupleThing);
+            }
+            catch (Exception e)
+            {
+                SocketState nullSocket = new SocketState(toCall, null);
+                setError(nullSocket, e.Message);
+            }
             return listener;
         }
 
@@ -101,9 +109,6 @@ namespace NetworkUtil {
         /// <param name="port">The port on which the server is listening</param>
         public static void ConnectToServer(Action<SocketState> toCall, string hostName, int port)
         {
-            // TODO: This method is incomplete, but contains a starting point 
-            //       for decoding a host address
-
             // Establish the remote endpoint for the socket.
             IPHostEntry ipHostInfo;
             IPAddress ipAddress = IPAddress.None;
@@ -149,7 +154,6 @@ namespace NetworkUtil {
             // game like ours will be 
             socket.NoDelay = true;
 
-            // TODO: Finish the remainder of the connection process as specified.
             SocketState newSocket = new SocketState(toCall, socket);
 
             try
@@ -191,16 +195,14 @@ namespace NetworkUtil {
             try
             {
                 newSocket.TheSocket.EndConnect(ar);
+                //connection was established successfully
+                newSocket.OnNetworkAction(newSocket);
             }
             catch (Exception e)
             {
                 setError(newSocket, e.Message);
                 return;
             }
-
-            //connection was established successfully
-            newSocket.OnNetworkAction(newSocket);
-
         }
 
 
@@ -341,10 +343,8 @@ namespace NetworkUtil {
         /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
         public static bool SendAndClose(Socket socket, string data)
         {
-            //need to see if this acutlly tells us if this socket is closed or not
             if (!socket.Connected)
                 return false;
-            bool closed = socket.Connected;
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
             try
             {
