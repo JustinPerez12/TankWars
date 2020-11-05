@@ -8,7 +8,6 @@ namespace NetworkUtil {
 
     public static class Networking {
 
-        //private static List<Socket> clients;
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Server-Side Code
@@ -70,12 +69,7 @@ namespace NetworkUtil {
             }
         }
 
-        private static void setError(SocketState socketState, string message)
-        {
-            socketState.ErrorOccured = true;
-            socketState.ErrorMessage = message;
-            socketState.OnNetworkAction(socketState);
-        }
+
 
         /// <summary>
         /// Stops the given TcpListener.
@@ -155,7 +149,24 @@ namespace NetworkUtil {
 
             // TODO: Finish the remainder of the connection process as specified.
             SocketState newSocket = new SocketState(toCall, socket);
-            newSocket.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, newSocket);
+
+            try
+            {
+                IAsyncResult ar = newSocket.TheSocket.BeginConnect(ipAddress, port, ConnectedCallback, newSocket);
+
+                if (!ar.AsyncWaitHandle.WaitOne(3000, false))
+                {
+                    setError(newSocket, "could not connect to server");
+                    return;
+                }
+
+                ar.AsyncWaitHandle.Close();
+            }
+            catch (Exception e)
+            {
+                setError(newSocket, e.Message);
+                return;
+            }
         }
 
         /// <summary>
@@ -174,10 +185,20 @@ namespace NetworkUtil {
         private static void ConnectedCallback(IAsyncResult ar)
         {
             SocketState newSocket = (SocketState)ar.AsyncState;
-            newSocket.TheSocket.EndConnect(ar);
+
+            try
+            {
+                newSocket.TheSocket.EndConnect(ar);
+            }
+            catch (Exception e)
+            {
+                setError(newSocket, e.Message);
+                return;
+            }
 
             //connection was established successfully
             newSocket.OnNetworkAction(newSocket);
+
         }
 
 
@@ -199,8 +220,14 @@ namespace NetworkUtil {
         /// <param name="state">The SocketState to begin receiving</param>
         public static void GetData(SocketState state)
         {
-            //StringBuilder currentData = state.data;
-            state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            try
+            {
+                state.TheSocket.BeginReceive(state.buffer, 0, SocketState.BufferSize, SocketFlags.None, ReceiveCallback, state);
+            }
+            catch (Exception e)
+            {
+                setError(state, e.Message);
+            }
         }
 
         /// <summary>
@@ -231,7 +258,7 @@ namespace NetworkUtil {
                 state.data.Append(data);
 
                 // detects client disconnection
-                if(data.Equals(""))
+                if (numBytes == 0)
                 {
                     setError(state, "closed client");
                     return;
@@ -285,7 +312,14 @@ namespace NetworkUtil {
         private static void SendCallback(IAsyncResult ar)
         {
             Socket socket = (Socket)ar.AsyncState;
-            socket.EndSend(ar);
+            try
+            {
+                socket.EndSend(ar);
+            }
+            catch (Exception e)
+            {
+                setError(socket, e.Message);
+            }
         }
 
 
@@ -301,7 +335,9 @@ namespace NetworkUtil {
         /// <param name="data">The string to send</param>
         /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
         public static bool SendAndClose(Socket socket, string data)
-        {
+        { 
+            //need to see if this acutlly tells us if this socket is closed or not
+            bool closed = socket.Connected;
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
             bool sent = true;
             try
@@ -313,6 +349,10 @@ namespace NetworkUtil {
             {
                 sent = false;
                 return sent;
+            }
+            finally
+            {
+                socket.Close();
             }
         }
 
@@ -332,8 +372,26 @@ namespace NetworkUtil {
         private static void SendAndCloseCallback(IAsyncResult ar)
         {
             Socket socket = (Socket)ar.AsyncState;
-            socket.EndSend(ar);
-            socket.Close();
+            try
+            {
+                socket.EndSend(ar);
+                
+            }
+            catch (Exception e)
+            {
+            }
+            finally
+            {
+                socket.Close();
+            }
+
+        }
+
+        private static void setError(SocketState socketState, string message)
+        {
+            socketState.ErrorOccured = true;
+            socketState.ErrorMessage = message;
+            socketState.OnNetworkAction(socketState);
         }
 
     }
