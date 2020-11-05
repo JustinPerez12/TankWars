@@ -123,7 +123,8 @@ namespace NetworkUtil {
                 // Didn't find any IPV4 addresses
                 if (!foundIPV4)
                 {
-                    // TODO: Indicate an error to the user, as specified in the documentation
+                    SocketState nullSocket = new SocketState(toCall, null);
+                    setError(nullSocket, "IP not found");
                 }
             }
             catch (Exception)
@@ -135,7 +136,8 @@ namespace NetworkUtil {
                 }
                 catch (Exception)
                 {
-                    // TODO: Indicate an error to the user, as specified in the documentation
+                    SocketState nullSocket = new SocketState(toCall, null);
+                    setError(nullSocket, "IP not found");
                 }
             }
 
@@ -284,6 +286,8 @@ namespace NetworkUtil {
         /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
         public static bool Send(Socket socket, string data)
         {
+            if (!socket.Connected)
+                return false;
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
             bool sent = true;
             try
@@ -294,6 +298,7 @@ namespace NetworkUtil {
             catch (Exception)
             {
                 sent = false;
+                socket.Close();
                 return sent;
             }
         }
@@ -318,7 +323,7 @@ namespace NetworkUtil {
             }
             catch (Exception e)
             {
-                setError(socket, e.Message);
+                socket.Shutdown(SocketShutdown.Both);
             }
         }
 
@@ -335,20 +340,21 @@ namespace NetworkUtil {
         /// <param name="data">The string to send</param>
         /// <returns>True if the send process was started, false if an error occurs or the socket is already closed</returns>
         public static bool SendAndClose(Socket socket, string data)
-        { 
+        {
             //need to see if this acutlly tells us if this socket is closed or not
+            if (!socket.Connected)
+                return false;
             bool closed = socket.Connected;
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
-            bool sent = true;
             try
             {
                 socket.BeginSend(dataBytes, 0, dataBytes.Length, SocketFlags.None, SendAndCloseCallback, socket);
-                return sent;
+                return true;
             }
             catch (Exception)
             {
-                sent = false;
-                return sent;
+                socket.Shutdown(SocketShutdown.Both);
+                return false;
             }
             finally
             {
@@ -379,6 +385,7 @@ namespace NetworkUtil {
             }
             catch (Exception e)
             {
+                socket.Shutdown(SocketShutdown.Both);
             }
             finally
             {
