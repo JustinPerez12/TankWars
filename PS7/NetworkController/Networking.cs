@@ -59,8 +59,6 @@ namespace NetworkUtil {
             SocketState newSocket = new SocketState(tupleThing.Item1, tupleThing.Item2.EndAcceptSocket(ar));
             newSocket.OnNetworkAction(newSocket);
             tupleThing.Item2.BeginAcceptSocket(AcceptNewClient, tupleThing);
-
-
         }
 
         /// <summary>
@@ -109,7 +107,7 @@ namespace NetworkUtil {
                     if (addr.AddressFamily != AddressFamily.InterNetworkV6)
                     {
                         foundIPV4 = true;
-                        ipAddress = addr;
+                        ipAddress =  addr;
                         break;
                     }
                 // Didn't find any IPV4 addresses
