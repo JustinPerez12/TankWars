@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\NetworkController\NetworkController.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="NetworkController">
+      <HintPath>..\NetworkController\bin\Debug\netstandard2.0\NetworkController.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
