@@ -84,9 +84,17 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DrawingPanel\DrawingPanel.csproj">
+      <Project>{6aed4728-3579-4345-8923-fe94cfaf86a1}</Project>
+      <Name>DrawingPanel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GameController\GameController.csproj">
       <Project>{457352b8-0dde-4a2b-b10c-8b26aa052e01}</Project>
       <Name>GameController</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Model\Model.csproj">
+      <Project>{A5B81547-F181-4517-A67D-F64F33AC12C9}</Project>
+      <Name>Model</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

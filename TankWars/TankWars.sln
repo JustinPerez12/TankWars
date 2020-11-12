@@ -7,13 +7,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "View", "View\View.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Resources", "Resources\Resources.csproj", "{A248E63D-CD14-4615-9773-FFC08D90EC65}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "GameController\GameController.csproj", "{457352B8-0DDE-4A2B-B10C-8B26AA052E01}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GameController", "GameController\GameController.csproj", "{457352B8-0DDE-4A2B-B10C-8B26AA052E01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Model", "Model\Model.csproj", "{A5B81547-F181-4517-A67D-F64F33AC12C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Model", "Model\Model.csproj", "{A5B81547-F181-4517-A67D-F64F33AC12C9}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetworkController", "NetworkController\NetworkController.csproj", "{1C8B803D-E077-47FA-BCE0-699F73DBE3EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vector2D", "Vector2D\Vector2D.csproj", "{9D85CA23-CAE3-45CE-B3A5-EC5C041874A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vector2D", "Vector2D\Vector2D.csproj", "{9D85CA23-CAE3-45CE-B3A5-EC5C041874A4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrawingPanel", "DrawingPanel\DrawingPanel.csproj", "{6AED4728-3579-4345-8923-FE94CFAF86A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +46,10 @@ Global
 		{9D85CA23-CAE3-45CE-B3A5-EC5C041874A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D85CA23-CAE3-45CE-B3A5-EC5C041874A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D85CA23-CAE3-45CE-B3A5-EC5C041874A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AED4728-3579-4345-8923-FE94CFAF86A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AED4728-3579-4345-8923-FE94CFAF86A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AED4728-3579-4345-8923-FE94CFAF86A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AED4728-3579-4345-8923-FE94CFAF86A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

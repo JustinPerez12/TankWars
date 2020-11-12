@@ -1,4 +1,7 @@
 ﻿using GameController;
+using Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,10 +16,19 @@ namespace View {
     public partial class Form1 : Form {
 
         Controller controller;
+        DrawingPanel panel;
+
+        private const int viewSize = 500;
+        private const int menuSize = 40;
 
         public Form1()
         {
             InitializeComponent();
+            panel = new DrawingPanel();
+            panel.Location = new Point(0, menuSize);
+            panel.Size = new Size(viewSize, viewSize);
+            this.Controls.Add(panel);
+
             controller = new Controller();
             controller.InputArrived += DisplayInput;
             controller.error += ErrorEvent;
@@ -34,6 +46,7 @@ namespace View {
         {
             foreach(string p in newInput)
             {
+                Tank rebuilt = JsonConvert.DeserializeObject<Tank>(p);
                 this.Invoke(new MethodInvoker(() => messages.AppendText(p + Environment.NewLine)));
             }
         }

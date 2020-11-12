@@ -2,9 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Model;
 
 namespace GameController {
     public class Controller {
+
+        private World theWorld;
+        private int worldSize = 2000;
 
         public delegate void InputHandler(IEnumerable<string> text);
         public event InputHandler InputArrived;
@@ -14,6 +18,10 @@ namespace GameController {
 
         SocketState theServer = null;
 
+        public Controller()
+        {
+            theWorld = new World(worldSize);
+        }
         public void Connect(string address)
         {
             Networking.ConnectToServer(OnConnect, address, 11000);
