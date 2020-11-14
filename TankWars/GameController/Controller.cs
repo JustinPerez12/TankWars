@@ -13,7 +13,7 @@ namespace GameController {
         private World theWorld;
         private int worldSize = 2000;
 
-        public delegate void InputHandler(IEnumerable<string> text);
+        public delegate void InputHandler(IEnumerable<object> text);
         public event InputHandler InputArrived;
 
         public delegate void ErrorEvent(string message);
@@ -53,7 +53,7 @@ namespace GameController {
                 return;
             }
             theServer = state;
-            name();
+            //name();
 
             // Start an event loop to receive messages from the server
             state.OnNetworkAction = ReceiveMessage;
@@ -91,7 +91,7 @@ namespace GameController {
         /// <param name="state"></param>
         private void ProcessMessages(SocketState state)
         {
-            List<string> input = new List<string>();
+            List<object> items = new List<object>();
 
             string totalData = state.GetData();
             string[] parts = Regex.Split(totalData, @"(?<=[\n])");
@@ -123,27 +123,42 @@ namespace GameController {
                     Tank tank = null;
                     Projectile proj = null;
                     Wall wall = null;
+                    Powerup power = null;
 
                     JObject obj = JObject.Parse(p);
                     JToken tankValue = obj["tank"];
                     JToken wallValue = obj["wall"];
-                    JToken projValue = obj["projectile"];
+                    JToken projValue = obj["proj"];
+                    JToken powerupValue = obj["power"];
 
-                    if(tankValue != null)
+                    if (tankValue != null)
+                    {
                         tank = JsonConvert.DeserializeObject<Tank>(p);
-                    if (wallValue != null)
+                        items.Add(tank);
+                    }
+                    else if (wallValue != null)
+                    {
                         wall = JsonConvert.DeserializeObject<Wall>(p);
-                    if (projValue != null)
+                        items.Add(wall);
+                    }
+                    else if (projValue != null)
+                    {
                         proj = JsonConvert.DeserializeObject<Projectile>(p);
+                        items.Add(proj);
+                    }
+
+                    else if(powerupValue != null)
+                    {
+                        power = JsonConvert.DeserializeObject<Powerup>(p);
+                        items.Add(power);
+                    }
                 } 
                 catch (Exception)
                 {
 
                 }
-
-                input.Add(p);
             }
-            InputArrived(input);
+            InputArrived(items);
         }
 
         public void MessageEntered(string message)

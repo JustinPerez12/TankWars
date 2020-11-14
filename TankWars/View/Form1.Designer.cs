@@ -35,7 +35,6 @@
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
             this.messageToSendBox = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.messages = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // nameBox
@@ -92,20 +91,11 @@
             this.contextMenuStrip1.Name = "contextMenuStrip1";
             this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
             // 
-            // messages
-            // 
-            this.messages.Location = new System.Drawing.Point(12, 42);
-            this.messages.Name = "messages";
-            this.messages.Size = new System.Drawing.Size(756, 353);
-            this.messages.TabIndex = 7;
-            this.messages.Text = "";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(780, 446);
-            this.Controls.Add(this.messages);
             this.Controls.Add(this.messageToSendBox);
             this.Controls.Add(this.nameLabel);
             this.Controls.Add(this.serverLabel);
@@ -128,7 +118,6 @@
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
         private System.Windows.Forms.TextBox messageToSendBox;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
-        private System.Windows.Forms.RichTextBox messages;
     }
 }
 

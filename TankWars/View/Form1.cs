@@ -50,12 +50,13 @@ namespace View {
             MessageBox.Show("Error connecting to server. Please restart the client.");
         }
 
-        private void DisplayInput(IEnumerable<string> newInput)
+        private void DisplayInput(IEnumerable<object> newInput)
         {
-            foreach (string p in newInput)
+            foreach (object p in newInput)
             {
                 //Tank rebuilt = JsonConvert.DeserializeObject<Tank>(p);
-                this.Invoke(new MethodInvoker(() => messages.AppendText(p + Environment.NewLine)));
+                //this.Invoke(new MethodInvoker(() => messages.AppendText(p + Environment.NewLine)));
+
             }
         }
 
@@ -100,6 +101,10 @@ namespace View {
             serverAddress.Enabled = false;
 
             controller.Connect(serverAddress.Text);
+
+            /*string name = nameBox.Text;
+            nameBox.Enabled = false;
+            controller.MessageEntered(name);*/
             //Networking.ConnectToServer(OnConnect, serverAddress.Text, 11000);
         }
 
