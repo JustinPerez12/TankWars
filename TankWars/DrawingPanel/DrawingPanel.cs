@@ -78,11 +78,8 @@ namespace View {
                 // So if we want the rectangle centered on the player's location, we have to offset it
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-
-                if (p.GetTeam() == 1) // team 1 is blue
-                    e.Graphics.FillRectangle(blueBrush, r);
-                else                  // team 2 is green
-                    e.Graphics.FillRectangle(greenBrush, r);
+                 // team 2 is green
+                 e.Graphics.FillRectangle(greenBrush, r);
             }
         }
 
@@ -101,7 +98,7 @@ namespace View {
         /// <param name="e">The PaintEventArgs to access the graphics</param>
         private void PowerupDrawer(object o, PaintEventArgs e)
         {
-            Powerup p = o as Powerup;
+            /*Powerup p = o as Powerup;
 
             int width = 8;
             int height = 8;
@@ -121,7 +118,7 @@ namespace View {
                     e.Graphics.FillEllipse(yellowBrush, r);
                 if (p.GetKind() == 3) // black powerup
                     e.Graphics.FillEllipse(blackBrush, r);
-            }
+            }*/
         }
 
 

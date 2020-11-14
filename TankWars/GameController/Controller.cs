@@ -3,6 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Model;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Windows.Forms;
 
 namespace GameController {
     public class Controller {
@@ -16,12 +19,21 @@ namespace GameController {
         public delegate void ErrorEvent(string message);
         public event ErrorEvent error;
 
+        public delegate void SetName();
+        public event SetName name;
+
         SocketState theServer = null;
 
         public Controller()
         {
             theWorld = new World(worldSize);
         }
+
+        public World getWorld()
+        {
+            return theWorld;
+        }
+
         public void Connect(string address)
         {
             Networking.ConnectToServer(OnConnect, address, 11000);
@@ -40,11 +52,12 @@ namespace GameController {
                 error(state.ErrorMessage);
                 return;
             }
-
             theServer = state;
+            name();
 
             // Start an event loop to receive messages from the server
             state.OnNetworkAction = ReceiveMessage;
+
             Networking.GetData(state);
         }
 
@@ -104,6 +117,30 @@ namespace GameController {
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
+
+                try
+                {
+                    Tank tank = null;
+                    Projectile proj = null;
+                    Wall wall = null;
+
+                    JObject obj = JObject.Parse(p);
+                    JToken tankValue = obj["tank"];
+                    JToken wallValue = obj["wall"];
+                    JToken projValue = obj["projectile"];
+
+                    if(tankValue != null)
+                        tank = JsonConvert.DeserializeObject<Tank>(p);
+                    if (wallValue != null)
+                        wall = JsonConvert.DeserializeObject<Wall>(p);
+                    if (projValue != null)
+                        proj = JsonConvert.DeserializeObject<Projectile>(p);
+                } 
+                catch (Exception)
+                {
+
+                }
+
                 input.Add(p);
             }
             InputArrived(input);

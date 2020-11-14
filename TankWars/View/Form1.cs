@@ -17,22 +17,30 @@ namespace View {
 
         Controller controller;
         DrawingPanel panel;
+        World theWorld;
 
         private const int viewSize = 500;
         private const int menuSize = 40;
 
+
         public Form1()
         {
             InitializeComponent();
-            panel = new DrawingPanel();
-            panel.Location = new Point(0, menuSize);
-            panel.Size = new Size(viewSize, viewSize);
-            this.Controls.Add(panel);
 
             controller = new Controller();
             controller.InputArrived += DisplayInput;
             controller.error += ErrorEvent;
             messageToSendBox.KeyDown += new KeyEventHandler(MessageEnterHandler);
+
+            controller.name += setName;
+
+            theWorld = controller.getWorld();
+            panel = new DrawingPanel(theWorld);
+            panel.Location = new Point(0, menuSize);
+            panel.Size = new Size(viewSize, viewSize);
+            this.Controls.Add(panel);
+
+            serverAddress.Text = "localhost";
 
             FormClosed += OnExit;
         }
@@ -44,11 +52,19 @@ namespace View {
 
         private void DisplayInput(IEnumerable<string> newInput)
         {
-            foreach(string p in newInput)
+            foreach (string p in newInput)
             {
-                Tank rebuilt = JsonConvert.DeserializeObject<Tank>(p);
+                //Tank rebuilt = JsonConvert.DeserializeObject<Tank>(p);
                 this.Invoke(new MethodInvoker(() => messages.AppendText(p + Environment.NewLine)));
             }
+        }
+
+        private void setName()
+        {
+            string name = nameBox.Text;
+            nameBox.Enabled = false;
+            this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
+            
         }
 
         /// <summary>
@@ -74,7 +90,11 @@ namespace View {
                 MessageBox.Show("Please enter a server address");
                 return;
             }
-
+            if (nameBox.Text == "")
+            {
+                MessageBox.Show("Please enter a name");
+                return;
+            }
             // Disable the controls and try to connect
             connectButton.Enabled = false;
             serverAddress.Enabled = false;
@@ -98,7 +118,9 @@ namespace View {
                 e.SuppressKeyPress = true;
 
                 // Append a newline, since that is our protocol's terminating character for a message.
-               string message = /*messageToSendBox.Text +*/ "";
+                string message = nameBox.Text;
+                nameBox.Enabled = false;
+
 
                 // Reset the textbox
                 //essageToSendBox.Text = "";
