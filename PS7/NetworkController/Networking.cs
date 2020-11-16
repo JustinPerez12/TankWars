@@ -122,7 +122,7 @@ namespace NetworkUtil {
                     if (addr.AddressFamily != AddressFamily.InterNetworkV6)
                     {
                         foundIPV4 = true;
-                        ipAddress = addr;
+                        ipAddress =  addr;
                         break;
                     }
                 // Didn't find any IPV4 addresses
