@@ -52,10 +52,14 @@ namespace View {
 
         private void DisplayInput(IEnumerable<object> newInput)
         {
-            foreach (object p in newInput)
+            lock (theWorld)
             {
-                //Tank rebuilt = JsonConvert.DeserializeObject<Tank>(p);
-                //this.Invoke(new MethodInvoker(() => messages.AppendText(p + Environment.NewLine)));
+                foreach (object p in newInput)
+                {
+                    MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
+                    Invoke(mi);
+
+                }
 
             }
         }
@@ -65,7 +69,7 @@ namespace View {
             string name = nameBox.Text;
             nameBox.Enabled = false;
             this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
-            
+
         }
 
         /// <summary>

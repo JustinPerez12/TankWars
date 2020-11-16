@@ -11,18 +11,38 @@ namespace Model {
     public class Powerup {
 
         [JsonProperty(PropertyName = "power")]
-        public int wallNum;
+        private int powerupNum;
 
         [JsonProperty(PropertyName = "loc")]
-        public Vector2D location;
+        private Vector2D location;
 
         [JsonProperty(PropertyName = "died")]
-        public bool died;
+        private bool died;
 
 
         public Powerup()
         {
 
+        }
+
+        public int getPowerNum()
+        {
+            return powerupNum;
+        }
+
+        public Vector2D getLocation()
+        {
+            return location;
+        }
+
+        public double GetLocationX()
+        {
+            return location.GetX();
+        }
+
+        public double GetLocationY()
+        {
+            return location.GetY();
         }
 
     }

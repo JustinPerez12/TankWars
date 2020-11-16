@@ -78,8 +78,8 @@ namespace View {
                 // So if we want the rectangle centered on the player's location, we have to offset it
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-                 // team 2 is green
-                 e.Graphics.FillRectangle(greenBrush, r);
+                // team 2 is green
+                e.Graphics.FillRectangle(greenBrush, r);
             }
         }
 
@@ -98,7 +98,7 @@ namespace View {
         /// <param name="e">The PaintEventArgs to access the graphics</param>
         private void PowerupDrawer(object o, PaintEventArgs e)
         {
-            /*Powerup p = o as Powerup;
+            Powerup p = o as Powerup;
 
             int width = 8;
             int height = 8;
@@ -112,20 +112,43 @@ namespace View {
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
 
-                if (p.GetKind() == 1) // red powerup
-                    e.Graphics.FillEllipse(redBrush, r);
-                if (p.GetKind() == 2) // yellow powerup
-                    e.Graphics.FillEllipse(yellowBrush, r);
-                if (p.GetKind() == 3) // black powerup
-                    e.Graphics.FillEllipse(blackBrush, r);
-            }*/
+
+                e.Graphics.FillEllipse(blackBrush, r);
+            }
         }
 
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine);
+            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
+            lock(theWorld)
+            {
+                // Draw the players
+                foreach (Tank tank in theWorld.Tanks.Values)
+                {
+                    DrawObjectWithTransform(e, tank, theWorld.size, 0, 0, tank.GetOrientationAngle(), TankDrawer);
+                }
+                // Draw the powerups
+                foreach (Powerup pow in theWorld.Powerups.Values)
+                {
+                    DrawObjectWithTransform(e, pow, theWorld.size, pow.GetLocationX(), pow.GetLocationY(), 0, PowerupDrawer);
+                }
+
+                foreach (Projectile proj in theWorld.Projectiles.Values)
+                {
+                    DrawObjectWithTransform(e, proj, theWorld.size, proj.GetLocationX(), proj.GetLocationY(), proj.GetDirectionAngle(), TankDrawer);
+                }
+
+
+                /*foreach (Wall wall in theWorld.Walls.Values)
+                {
+                    DrawObjectWithTransform(e, wall, theWorld.size, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
+                }*/
+
+                // Do anything that Panel (from which we inherit) needs to do
+                base.OnPaint(e);
+            }
         }
 
     }

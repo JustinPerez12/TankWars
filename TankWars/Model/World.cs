@@ -7,6 +7,7 @@ namespace Model {
         public Dictionary<int, Tank> Tanks;
         public Dictionary<int, Projectile> Projectiles;
         public Dictionary<int, Wall> Walls;
+        public Dictionary<int, Powerup> Powerups;
         public int size
         { get; private set; }
 
@@ -15,6 +16,7 @@ namespace Model {
             Tanks = new Dictionary<int, Tank>();
             Projectiles = new Dictionary<int, Projectile>();
             Walls = new Dictionary<int, Wall>();
+            Powerups = new Dictionary<int, Powerup>();
             size = _size;
         }
     }

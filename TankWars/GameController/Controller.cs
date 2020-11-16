@@ -120,10 +120,10 @@ namespace GameController {
 
                 try
                 {
-                    Tank tank = null;
-                    Projectile proj = null;
-                    Wall wall = null;
-                    Powerup power = null;
+                    
+                    
+                   
+                    
 
                     JObject obj = JObject.Parse(p);
                     JToken tankValue = obj["tank"];
@@ -133,23 +133,31 @@ namespace GameController {
 
                     if (tankValue != null)
                     {
+                        Tank tank = null;
                         tank = JsonConvert.DeserializeObject<Tank>(p);
+                        theWorld.Tanks.Add(tank.GetID(), tank);
                         items.Add(tank);
                     }
                     else if (wallValue != null)
                     {
+                        Wall wall = null;
                         wall = JsonConvert.DeserializeObject<Wall>(p);
+                        theWorld.Walls.Add(wall.getWallNum(), wall);
                         items.Add(wall);
                     }
                     else if (projValue != null)
                     {
+                        Projectile proj = null;
                         proj = JsonConvert.DeserializeObject<Projectile>(p);
+                        theWorld.Projectiles.Add(proj.getProjnum(), proj);
                         items.Add(proj);
                     }
 
                     else if(powerupValue != null)
                     {
+                        Powerup power = null;
                         power = JsonConvert.DeserializeObject<Powerup>(p);
+                        theWorld.Powerups.Add(power.getPowerNum(), power);
                         items.Add(power);
                     }
                 } 

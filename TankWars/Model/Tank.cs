@@ -42,14 +42,6 @@ namespace Model {
 
         public Tank()
         {
-           // Tank rebuilt = JsonConvert.DeserializeObject<Tank>("tank");
-        }
-        public Tank(int _ID, Vector2D l, Vector2D o)
-        {
-            ID = _ID;
-            location = l;
-            orientation = o;
-            died = true;
         }
 
         public void Deactivate()
@@ -68,9 +60,27 @@ namespace Model {
         {
             return location;
         }
+
+        //Might delete later
+        public double GetLocationX()
+        {
+            return location.GetX();
+        }
+
+        //Might delete later
+        public double GetLocationY()
+        {
+            return location.GetY();
+        }
         public Vector2D GetOrientation()
         {
             return orientation;
+        }
+
+        //Might delete later
+        public double GetOrientationAngle()
+        {
+            return orientation.ToAngle();
         }
         public void SetLocation(Vector2D l)
         {
