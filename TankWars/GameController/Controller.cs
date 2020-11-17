@@ -120,10 +120,6 @@ namespace GameController {
 
                 try
                 {
-                    
-                    
-                   
-                    
 
                     JObject obj = JObject.Parse(p);
                     JToken tankValue = obj["tank"];

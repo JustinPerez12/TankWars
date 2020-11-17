@@ -10,6 +10,8 @@ using Model;
 namespace View {
     public class DrawingPanel : Panel {
         private World theWorld;
+        private int scale = 4;
+
         public DrawingPanel(World w)
         {
             DoubleBuffered = true;
@@ -46,9 +48,11 @@ namespace View {
         {
             // "push" the current transform
             System.Drawing.Drawing2D.Matrix oldMatrix = e.Graphics.Transform.Clone();
-
+            /*
             int x = WorldSpaceToImageSpace(worldSize, worldX);
-            int y = WorldSpaceToImageSpace(worldSize, worldY);
+            int y = WorldSpaceToImageSpace(worldSize, worldY);*/
+            int x = 0;
+            int y = 0;
             e.Graphics.TranslateTransform(x, y);
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
@@ -68,8 +72,8 @@ namespace View {
         {
             Tank p = o as Tank;
 
-            int width = 30;
-            int height = 30;
+            int width = 30 * scale;
+            int height = 30 * scale;
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
             using (System.Drawing.SolidBrush greenBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Green))
@@ -83,11 +87,6 @@ namespace View {
             }
         }
 
-        private void DrawMine(object o, PaintEventArgs e)
-        {
-            Image i = Image.FromFile("c:\\Users\\jaked\\Downloads\\carti1.jpg");
-            e.Graphics.DrawImage(i, 5, 5);
-        }
 
         /// <summary>
         /// Acts as a drawing delegate for DrawObjectWithTransform
@@ -118,16 +117,30 @@ namespace View {
         }
 
 
+        private void BackgroundDrawer(object o, PaintEventArgs e)
+        {
+            Image i = Image.FromFile("c:\\Users\\jaked\\Downloads\\TankWars\\Images\\Background.png");
+            int width = i.Width;
+            int height = i.Height;
+            RectangleF sourceRect = new RectangleF(0, 0, scale * width, scale * height);
+            //RectangleF destinationRect = new RectangleF(0, 0, .75f * width, .75f * height);
+            e.Graphics.DrawImage(i, sourceRect, sourceRect, GraphicsUnit.Pixel);
+
+            //e.Graphics.DrawImage(i, 0,0);
+        }
+
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
             //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
             lock(theWorld)
             {
+                DrawObjectWithTransform(e, null, theWorld.size, 0, 0, 0, BackgroundDrawer);
+
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, theWorld.size, 0, 0, tank.GetOrientationAngle(), TankDrawer);
+                    DrawObjectWithTransform(e, tank, theWorld.size, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
                 }
                 // Draw the powerups
                 foreach (Powerup pow in theWorld.Powerups.Values)

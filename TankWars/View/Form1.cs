@@ -19,7 +19,7 @@ namespace View {
         DrawingPanel panel;
         World theWorld;
 
-        private const int viewSize = 500;
+        private const int viewSize = 800;
         private const int menuSize = 40;
 
 
@@ -36,6 +36,7 @@ namespace View {
 
             theWorld = controller.getWorld();
             panel = new DrawingPanel(theWorld);
+            //panel.Location = new Point(0, menuSize);
             panel.Location = new Point(0, menuSize);
             panel.Size = new Size(viewSize, viewSize);
             this.Controls.Add(panel);
