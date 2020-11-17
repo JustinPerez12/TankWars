@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using GameController;
 using Model;
 
 namespace View {
@@ -12,11 +14,15 @@ namespace View {
     {
 
         private World theWorld;
+        private Controller controller;
         private int scale = 4;
+        private int viewSize = 800;
+        private int worldSize = 2000;
 
-        public DrawingPanel(World w)
+        public DrawingPanel(World w, Controller controller1)
         {
-            this.DoubleBuffered = true;
+            controller = controller1;
+            DoubleBuffered = true;
             theWorld = w;
         }
 
@@ -50,11 +56,11 @@ namespace View {
         {
             // "push" the current transform
             System.Drawing.Drawing2D.Matrix oldMatrix = e.Graphics.Transform.Clone();
-            /*
+
             int x = WorldSpaceToImageSpace(worldSize, worldX);
-            int y = WorldSpaceToImageSpace(worldSize, worldY);*/
-            int x = 0;
-            int y = 0;
+            int y = WorldSpaceToImageSpace(worldSize, worldY);
+/*            int x = 00;
+            int y = 0;*/
             e.Graphics.TranslateTransform(x, y);
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
@@ -72,23 +78,26 @@ namespace View {
         /// <param name="e">The PaintEventArgs to access the graphics</param>
         private void TankDrawer(object o, PaintEventArgs e)
         {
-            Tank p = o as Tank;
-
-            int width = 30 * scale;
-            int height = 30 * scale;
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
-            using (System.Drawing.SolidBrush greenBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Green))
-            {
-                // Rectangles are drawn starting from the top-left corner.
-                // So if we want the rectangle centered on the player's location, we have to offset it
-                // by half its size to the left (-width/2) and up (-height/2)
-                Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-                // team 2 is green
-                e.Graphics.FillRectangle(greenBrush, r);
-            }
+            /*            Tank p = o as Tank;
+                        Image j = teamColor(p);
+                        int width = 30;
+                        int height = 30;
+                        RectangleF sourceRect = new RectangleF(0, 0, width, height);
+                        RectangleF destinationRect = new RectangleF(0, 0, scale * width, scale * height);
+                        e.Graphics.DrawImage(i, destinationRect, sourceRect, GraphicsUnit.Pixel);
+            */
+            Tank t = o as Tank;
+            Color c = teamColor(t);
+            int tankWidth = 60;
+            Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
+            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
+                e.Graphics.FillRectangle(redBrush, r);
         }
 
+        private Color teamColor(Tank o)
+        {
+            return Color.Red;
+        }
 
         /// <summary>
         /// Acts as a drawing delegate for DrawObjectWithTransform
@@ -124,33 +133,47 @@ namespace View {
             Image i = Image.FromFile("c:\\Users\\jaked\\Downloads\\TankWars\\Images\\Background.png");
             int width = i.Width;
             int height = i.Height;
-            RectangleF sourceRect = new RectangleF(0, 0, scale * width, scale * height);
-            //RectangleF destinationRect = new RectangleF(0, 0, .75f * width, .75f * height);
-            e.Graphics.DrawImage(i, sourceRect, sourceRect, GraphicsUnit.Pixel);
+            Rectangle destinationRect = new Rectangle(0, 0, worldSize, worldSize);
+            e.Graphics.DrawImage(i, destinationRect, 0, 0, i.Width, i.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
         }
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
+            if(theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
+            {
+                double playerY = player.GetLocationY();
+                double playerX = player.GetLocationX();
 
+                //double ratio = (double)viewSize / (double)theWorld.getSize();
+                double ratio = (double)viewSize / (double)2000;
+                int halfSizeScaled = (int)(worldSize / 2.0 * ratio);
+
+                double inverseTranslateX = -WorldSpaceToImageSpace(worldSize, playerX) + halfSizeScaled;
+                double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, playerY) + halfSizeScaled;
+
+                e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
+            }
+
+            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
             lock(theWorld)
             {
-                //DrawObjectWithTransform(e, null, theWorld.size, 0, 0, 0, BackgroundDrawer);
+                BackgroundDrawer(null, e);
 
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, theWorld.size, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
                 }
                 // Draw the powerups
                 foreach (Powerup pow in theWorld.Powerups.Values)
                 {
-                    DrawObjectWithTransform(e, pow, theWorld.size, pow.GetLocationX(), pow.GetLocationY(), 0, PowerupDrawer);
+                    DrawObjectWithTransform(e, pow, worldSize, pow.GetLocationX(), pow.GetLocationY(), 0, PowerupDrawer);
                 }
 
                 foreach (Projectile proj in theWorld.Projectiles.Values)
                 {
-                    DrawObjectWithTransform(e, proj, theWorld.size, proj.GetLocationX(), proj.GetLocationY(), proj.GetDirectionAngle(), TankDrawer);
+                    DrawObjectWithTransform(e, proj, worldSize, proj.GetLocationX(), proj.GetLocationY(), proj.GetDirectionAngle(), TankDrawer);
                 }
 
 

@@ -14,7 +14,8 @@ namespace GameController
     {
 
         private World theWorld;
-        private int worldSize = 2000;
+        private int worldSize;
+        private int ID;
 
         public delegate void InputHandler(IEnumerable<object> text);
         public event InputHandler InputArrived;
@@ -135,6 +136,8 @@ namespace GameController
                     {
                         Tank tank = null;
                         tank = JsonConvert.DeserializeObject<Tank>(p);
+                        if (theWorld.Tanks.ContainsKey(tank.GetID()))
+                            continue;
                         theWorld.Tanks.Add(tank.GetID(), tank);
                         items.Add(tank);
                     }
@@ -142,6 +145,8 @@ namespace GameController
                     {
                         Wall wall = null;
                         wall = JsonConvert.DeserializeObject<Wall>(p);
+                        if (theWorld.Walls.ContainsKey(wall.getWallNum()))
+                            continue;
                         theWorld.Walls.Add(wall.getWallNum(), wall);
                         items.Add(wall);
                     }
@@ -149,6 +154,8 @@ namespace GameController
                     {
                         Projectile proj = null;
                         proj = JsonConvert.DeserializeObject<Projectile>(p);
+                        if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
+                            continue;
                         theWorld.Projectiles.Add(proj.getProjnum(), proj);
                         items.Add(proj);
                     }
@@ -157,16 +164,24 @@ namespace GameController
                     {
                         Powerup power = null;
                         power = JsonConvert.DeserializeObject<Powerup>(p);
+                        if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
+                            continue;
                         theWorld.Powerups.Add(power.getPowerNum(), power);
                         items.Add(power);
                     }
                 }
                 catch (Exception)
                 {
-
+                        ID = int.Parse(parts[0]);
+                        worldSize = int.Parse(parts[1]);
                 }
             }
             InputArrived(items);
+        }
+
+        public int getID()
+        {
+            return ID;
         }
 
         public void MessageEntered(string message)

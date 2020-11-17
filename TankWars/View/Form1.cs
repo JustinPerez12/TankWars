@@ -31,12 +31,11 @@ namespace View {
             controller = new Controller();
             controller.InputArrived += DisplayInput;
             controller.error += ErrorEvent;
-            messageToSendBox.KeyDown += new KeyEventHandler(MessageEnterHandler);
 
             controller.name += setName;
 
             theWorld = controller.getWorld();
-            panel = new DrawingPanel(theWorld);
+            panel = new DrawingPanel(theWorld, controller);
             //panel.Location = new Point(0, menuSize);
             panel.Location = new Point(0, menuSize);
             panel.Size = new Size(viewSize, viewSize);
@@ -61,9 +60,7 @@ namespace View {
                 {
                     MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
                     Invoke(mi);
-
                 }
-
             }
         }
 
@@ -109,38 +106,10 @@ namespace View {
 
             controller.Connect(serverAddress.Text);
 
-
-            //may delete this later 
-            /*string name = nameBox.Text;
+            string name = nameBox.Text;
             nameBox.Enabled = false;
-            controller.MessageEntered(name);*/
+            controller.MessageEntered(name);
             //Networking.ConnectToServer(OnConnect, serverAddress.Text, 11000);
         }
-
-
-        /// <summary>
-        /// This is the event handler when the enter key is pressed in the messageToSend box
-        /// </summary>
-        /// <param name="sender">The Form control that fired the event</param>
-        /// <param name="e">The key event arguments</param>
-        private void MessageEnterHandler(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.Enter)
-            {
-                // prevent the windows "ding" sound
-                e.Handled = true;
-                e.SuppressKeyPress = true;
-
-                // Append a newline, since that is our protocol's terminating character for a message.
-                string message = nameBox.Text;
-                nameBox.Enabled = false;
-
-                // Send the message to the server
-                //Networking.Send(theServer.TheSocket, message);
-                controller.MessageEntered(message);
-                messageToSendBox.Enabled = false;
-            }
-        }
-
     }
 }

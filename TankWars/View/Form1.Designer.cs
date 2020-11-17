@@ -33,7 +33,6 @@
             this.serverLabel = new System.Windows.Forms.Label();
             this.nameLabel = new System.Windows.Forms.Label();
             this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
-            this.messageToSendBox = new System.Windows.Forms.TextBox();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.SuspendLayout();
             // 
@@ -79,13 +78,6 @@
             this.nameLabel.TabIndex = 4;
             this.nameLabel.Text = "Name";
             // 
-            // messageToSendBox
-            // 
-            this.messageToSendBox.Location = new System.Drawing.Point(15, 929);
-            this.messageToSendBox.Name = "messageToSendBox";
-            this.messageToSendBox.Size = new System.Drawing.Size(903, 20);
-            this.messageToSendBox.TabIndex = 5;
-            // 
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Name = "contextMenuStrip1";
@@ -95,8 +87,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(930, 961);
-            this.Controls.Add(this.messageToSendBox);
+            this.ClientSize = new System.Drawing.Size(784, 801);
             this.Controls.Add(this.nameLabel);
             this.Controls.Add(this.serverLabel);
             this.Controls.Add(this.connectButton);
@@ -116,7 +107,6 @@
         private System.Windows.Forms.Label serverLabel;
         private System.Windows.Forms.Label nameLabel;
         private System.ComponentModel.BackgroundWorker backgroundWorker1;
-        private System.Windows.Forms.TextBox messageToSendBox;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
     }
 }
