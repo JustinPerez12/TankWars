@@ -8,11 +8,13 @@ using System.Windows.Forms;
 using Model;
 
 namespace View {
-    public class DrawingPanel : Panel {
+    public class DrawingPanel : Panel 
+    {
+
         private World theWorld;
         public DrawingPanel(World w)
         {
-            DoubleBuffered = true;
+            this.DoubleBuffered = true;
             theWorld = w;
         }
 
@@ -78,15 +80,9 @@ namespace View {
                 // So if we want the rectangle centered on the player's location, we have to offset it
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-                 // team 2 is green
-                 e.Graphics.FillRectangle(greenBrush, r);
+                // team 2 is green
+                e.Graphics.FillRectangle(greenBrush, r);
             }
-        }
-
-        private void DrawMine(object o, PaintEventArgs e)
-        {
-            Image i = Image.FromFile("c:\\Users\\jaked\\Downloads\\carti1.jpg");
-            e.Graphics.DrawImage(i, 5, 5);
         }
 
         /// <summary>
@@ -98,7 +94,7 @@ namespace View {
         /// <param name="e">The PaintEventArgs to access the graphics</param>
         private void PowerupDrawer(object o, PaintEventArgs e)
         {
-            /*Powerup p = o as Powerup;
+            Powerup p = o as Powerup;
 
             int width = 8;
             int height = 8;
@@ -112,20 +108,49 @@ namespace View {
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
 
-                if (p.GetKind() == 1) // red powerup
+
+                //all this does is paint the circle a diffenret color depending on kind. nothing special just makes them different colors in lab12
+               /* if (p.GetKind() == 1) // red powerup
                     e.Graphics.FillEllipse(redBrush, r);
                 if (p.GetKind() == 2) // yellow powerup
                     e.Graphics.FillEllipse(yellowBrush, r);
-                if (p.GetKind() == 3) // black powerup
-                    e.Graphics.FillEllipse(blackBrush, r);
-            }*/
+                if (p.GetKind() == 3) // black powerup*/
+                e.Graphics.FillEllipse(blackBrush, r);
+            }
         }
 
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine);
+
+            //This is how we are going to draw our tanks, walls, etc.. 
+            // we need to store them in dictionaries in world class then for each one we draw. 
+            // Draw the players
+            lock (theWorld)
+            {
+                foreach (Tank tank in theWorld.Tanks.Values)
+                {
+                    DrawObjectWithTransform(e, tank, theWorld.size, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+                }
+
+                // Draw the powerups
+                foreach (Powerup pow in theWorld.Powerups.Values)
+                {
+                    DrawObjectWithTransform(e, pow, theWorld.size, pow.GetLocation().GetX(), pow.GetLocation().GetY(), 0, PowerupDrawer);
+                }
+
+                foreach(Projectile proj in theWorld.Projectiles.Values)
+                {
+                    DrawObjectWithTransform(e, proj, theWorld.size, proj.GetLocation().GetX(), proj.GetLocation().GetY(), 0, PowerupDrawer);
+                }
+
+                //i understand how to draw the other three objects but the wall is given a P1 and a P2 which both seem to act as locations with their own seperate X and Y. How do I draw walls?
+                /*foreach(Wall wall in theWorld.Walls.Values)
+                {
+                    DrawObjectWithTransform(e, wall, theWorld.size, wall.GetP1()., wall.GetLocation().GetY(), 0, PowerupDrawer);
+                }*/
+            }
         }
 
     }

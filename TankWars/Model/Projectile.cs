@@ -1,48 +1,55 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using TankWars;
 
 namespace Model {
     public class Projectile {
-        private Vector2D location;
-        private Vector2D orientation;
-        private bool active;
 
+        [JsonProperty(PropertyName = "proj")]
+        private int projNum;
+
+        [JsonProperty(PropertyName = "loc")]
+        private Vector2D location;
+
+        [JsonProperty(PropertyName = "dir")]
+        private Vector2D direction;
+
+        [JsonProperty(PropertyName = "died")]
+        private bool died;
+
+        [JsonProperty(PropertyName = "owner")]
+        private int ownerNum;
         public Projectile()
         {
 
         }
-        public Projectile(Vector2D l, Vector2D o)
+
+        public int GetProjNum()
         {
-            location = l;
-            orientation = o;
-            active = true;
+            return projNum;
         }
 
         public void Deactivate()
         {
-            active = false;
+            died = false;
         }
         public bool GetActive()
         {
-            return active;
+            return died;
         }
         public Vector2D GetLocation()
         {
             return location;
         }
-        public Vector2D GetOrientation()
+        public Vector2D GetDirection()
         {
-            return orientation;
+            return direction;
         }
         public void SetLocation(Vector2D l)
         {
             location = l;
-        }
-        public void SetOrientation(Vector2D o)
-        {
-            orientation = o;
         }
     }
 }

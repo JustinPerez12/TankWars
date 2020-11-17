@@ -6,9 +6,12 @@ using Model;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Windows.Forms;
+using System.Net.Sockets;
 
-namespace GameController {
-    public class Controller {
+namespace GameController
+{
+    public class Controller
+    {
 
         private World theWorld;
         private int worldSize = 2000;
@@ -38,6 +41,7 @@ namespace GameController {
         {
             Networking.ConnectToServer(OnConnect, address, 11000);
         }
+
 
         /// <summary>
         /// Method to be invoked by the networking library when a connection is made
@@ -113,18 +117,13 @@ namespace GameController {
                 // "messages" is the big message text box in the form.
                 // We must use a MethodInvoker, because only the thread 
                 // that created the GUI can modify it.
-                
+
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
 
                 try
                 {
-                    Tank tank = null;
-                    Projectile proj = null;
-                    Wall wall = null;
-                    Powerup power = null;
-
                     JObject obj = JObject.Parse(p);
                     JToken tankValue = obj["tank"];
                     JToken wallValue = obj["wall"];
@@ -133,26 +132,34 @@ namespace GameController {
 
                     if (tankValue != null)
                     {
+                        Tank tank = null;
                         tank = JsonConvert.DeserializeObject<Tank>(p);
+                        theWorld.Tanks.Add(tank.GetID(),tank);
                         items.Add(tank);
                     }
                     else if (wallValue != null)
                     {
+                        Wall wall = null;
                         wall = JsonConvert.DeserializeObject<Wall>(p);
+                        theWorld.Walls.Add(wall.GetWallNum(), wall);
                         items.Add(wall);
                     }
                     else if (projValue != null)
                     {
+                        Projectile proj = null;
                         proj = JsonConvert.DeserializeObject<Projectile>(p);
+                        theWorld.Projectiles.Add(proj.GetProjNum(), proj);
                         items.Add(proj);
                     }
 
-                    else if(powerupValue != null)
+                    else if (powerupValue != null)
                     {
+                        Powerup power = null;
                         power = JsonConvert.DeserializeObject<Powerup>(p);
+                        theWorld.Powerups.Add(power.GetPowerNum(), power);
                         items.Add(power);
                     }
-                } 
+                }
                 catch (Exception)
                 {
 
@@ -164,6 +171,21 @@ namespace GameController {
         public void MessageEntered(string message)
         {
             Networking.Send(theServer.TheSocket, message + "/n");
+        }
+
+        /// <summary>
+        /// Private helper method to Handle the form closing by shutting down the socket cleanly
+        /// </summary>
+        /// <returns></returns>
+        public bool Exit()
+        {
+            if (theServer != null)
+            {
+                theServer.TheSocket.Shutdown(SocketShutdown.Both);
+                return true;
+            }
+
+            return false;
         }
     }
 }

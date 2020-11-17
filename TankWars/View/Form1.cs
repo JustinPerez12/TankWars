@@ -13,10 +13,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace View {
-    public partial class Form1 : Form {
+    public partial class Form1 : Form 
+    {
 
         Controller controller;
-        DrawingPanel panel;
+        DrawingPanel dPanel;
         World theWorld;
 
         private const int viewSize = 500;
@@ -35,11 +36,12 @@ namespace View {
             controller.name += setName;
 
             theWorld = controller.getWorld();
-            panel = new DrawingPanel(theWorld);
-            panel.Location = new Point(0, menuSize);
-            panel.Size = new Size(viewSize, viewSize);
-            this.Controls.Add(panel);
+            dPanel = new DrawingPanel(theWorld);
+            dPanel.Location = new Point(0, menuSize);
+            dPanel.Size = new Size(viewSize, viewSize);
+            this.Controls.Add(dPanel);
 
+            //need to take this out later
             serverAddress.Text = "localhost";
 
             FormClosed += OnExit;
@@ -54,19 +56,12 @@ namespace View {
         {
             foreach (object p in newInput)
             {
-                //Tank rebuilt = JsonConvert.DeserializeObject<Tank>(p);
-                //this.Invoke(new MethodInvoker(() => messages.AppendText(p + Environment.NewLine)));
-
+                
+                MethodInvoker invalidator = new MethodInvoker(() => this.Invalidate(true));
+                this.Invoke(invalidator);
             }
         }
 
-        private void setName()
-        {
-            string name = nameBox.Text;
-            nameBox.Enabled = false;
-            this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
-            
-        }
 
         /// <summary>
         /// Handle the form closing by shutting down the socket cleanly
@@ -75,8 +70,7 @@ namespace View {
         /// <param name="e"></param>
         private void OnExit(object sender, FormClosedEventArgs e)
         {
-            /*if (theServer != null)
-                theServer.TheSocket.Shutdown(SocketShutdown.Both);*/
+            controller.Exit();
         }
 
         /// <summary>
@@ -96,12 +90,15 @@ namespace View {
                 MessageBox.Show("Please enter a name");
                 return;
             }
+
             // Disable the controls and try to connect
             connectButton.Enabled = false;
             serverAddress.Enabled = false;
 
             controller.Connect(serverAddress.Text);
 
+
+            //may delete this later 
             /*string name = nameBox.Text;
             nameBox.Enabled = false;
             controller.MessageEntered(name);*/
@@ -126,14 +123,22 @@ namespace View {
                 string message = nameBox.Text;
                 nameBox.Enabled = false;
 
-
-                // Reset the textbox
-                //essageToSendBox.Text = "";
-
                 // Send the message to the server
                 //Networking.Send(theServer.TheSocket, message);
                 controller.MessageEntered(message);
+                messageToSendBox.Enabled = false;
             }
+        }
+
+        /// <summary>
+        /// Private helper method. May delete this later 
+        /// </summary>
+        private void setName()
+        {
+            string name = nameBox.Text;
+            nameBox.Enabled = false;
+            this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
+
         }
     }
 }

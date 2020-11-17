@@ -8,7 +8,6 @@ namespace NetworkUtil {
 
     public static class Networking {
 
-
         /////////////////////////////////////////////////////////////////////////////////////////
         // Server-Side Code
         /////////////////////////////////////////////////////////////////////////////////////////
@@ -77,8 +76,6 @@ namespace NetworkUtil {
             }
         }
 
-
-
         /// <summary>
         /// Stops the given TcpListener.
         /// </summary>
@@ -122,7 +119,7 @@ namespace NetworkUtil {
                     if (addr.AddressFamily != AddressFamily.InterNetworkV6)
                     {
                         foundIPV4 = true;
-                        ipAddress = addr;
+                        ipAddress =  addr;
                         break;
                     }
                 // Didn't find any IPV4 addresses
@@ -204,7 +201,6 @@ namespace NetworkUtil {
                 return;
             }
         }
-
 
         /////////////////////////////////////////////////////////////////////////////////////////
         // Server and Client Common Code
@@ -290,18 +286,17 @@ namespace NetworkUtil {
         {
             if (!socket.Connected)
                 return false;
+
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
-            bool sent = true;
             try
             {
                 socket.BeginSend(dataBytes, 0, dataBytes.Length, SocketFlags.None, SendCallback, socket);
-                return sent;
+                return true;
             }
             catch (Exception)
-            {
-                sent = false;
+            {  
                 socket.Close();
-                return sent;
+                return false;
             }
         }
 
@@ -323,7 +318,7 @@ namespace NetworkUtil {
             {
                 socket.EndSend(ar);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 socket.Shutdown(SocketShutdown.Both);
             }
@@ -383,7 +378,7 @@ namespace NetworkUtil {
                 socket.EndSend(ar);
                 
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 socket.Shutdown(SocketShutdown.Both);
             }
@@ -394,6 +389,12 @@ namespace NetworkUtil {
 
         }
 
+
+        /// <summary>
+        /// Private helper method that sets the ErrorOccured to true, provides an ErrorMessage, and call the on the OnNetworkAction on the specific SocketState
+        /// </summary>
+        /// <param name="socketState"></param>
+        /// <param name="message"></param>
         private static void setError(SocketState socketState, string message)
         {
             socketState.ErrorOccured = true;

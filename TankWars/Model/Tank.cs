@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.Text;
 using TankWars;
 
-namespace Model {
+namespace Model
+{
 
     [JsonObject(MemberSerialization.OptIn)]
-    public class Tank {
+    public class Tank
+    {
 
         [JsonProperty(PropertyName = "tank")]
         private int ID;
@@ -25,31 +27,33 @@ namespace Model {
         private string name;
 
         [JsonProperty(PropertyName = "hp")]
-        private int hitPoints = 3;
+        private int hitPoints;
 
         [JsonProperty(PropertyName = "score")]
-        private int score = 0;
+        private int score;
 
         [JsonProperty(PropertyName = "died")]
-        private bool died = false;
+        private bool died;
 
         [JsonProperty(PropertyName = "dc")]
-        private bool disconnected = false;
+        private bool disconnected;
 
         [JsonProperty(PropertyName = "join")]
-        private bool joined = false;
+        private bool joined;
 
 
         public Tank()
         {
-           // Tank rebuilt = JsonConvert.DeserializeObject<Tank>("tank");
         }
-        public Tank(int _ID, Vector2D l, Vector2D o)
+
+        public string GetName()
         {
-            ID = _ID;
-            location = l;
-            orientation = o;
-            died = true;
+            return name;
+        }
+
+        public int GetHP()
+        {
+            return hitPoints;
         }
 
         public void Deactivate()
@@ -63,6 +67,16 @@ namespace Model {
         public int GetID()
         {
             return ID;
+        }
+
+        public bool Disconnected()
+        {
+            return disconnected;
+        }
+
+        public bool Joined()
+        {
+            return joined;
         }
         public Vector2D GetLocation()
         {
