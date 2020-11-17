@@ -19,5 +19,10 @@ namespace Model {
             Powerups = new Dictionary<int, Powerup>();
             size = _size;
         }
+
+        public int getSize()
+        {
+            return size;
+        }
     }
 }

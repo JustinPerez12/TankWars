@@ -58,6 +58,10 @@
     <Service Include="{94E38DFF-614B-4cbd-B67C-F211BB35CE8B}" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GameController\GameController.csproj">
+      <Project>{457352B8-0DDE-4A2B-B10C-8B26AA052E01}</Project>
+      <Name>GameController</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Model\Model.csproj">
       <Project>{A5B81547-F181-4517-A67D-F64F33AC12C9}</Project>
       <Name>Model</Name>
