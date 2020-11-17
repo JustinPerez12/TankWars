@@ -78,20 +78,11 @@ namespace View {
         /// <param name="e">The PaintEventArgs to access the graphics</param>
         private void TankDrawer(object o, PaintEventArgs e)
         {
-            /*            Tank p = o as Tank;
-                        Image j = teamColor(p);
-                        int width = 30;
-                        int height = 30;
-                        RectangleF sourceRect = new RectangleF(0, 0, width, height);
-                        RectangleF destinationRect = new RectangleF(0, 0, scale * width, scale * height);
-                        e.Graphics.DrawImage(i, destinationRect, sourceRect, GraphicsUnit.Pixel);
-            */
-            Tank t = o as Tank;
-            Color c = teamColor(t);
-            int tankWidth = 60;
-            Rectangle r = new Rectangle(-(tankWidth / 2), -(tankWidth / 2), tankWidth, tankWidth);
-            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
-                e.Graphics.FillRectangle(redBrush, r);
+            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\RedTank.png");
+            e.Graphics.DrawImage(i, 0, 0);
+            int width = i.Width;
+            int height = i.Height;
+            Rectangle destinationRect = new Rectangle(0, 0, worldSize, worldSize);
         }
 
         private Color teamColor(Tank o)
@@ -130,7 +121,7 @@ namespace View {
 
         private void BackgroundDrawer(object o, PaintEventArgs e)
         {
-            Image i = Image.FromFile("c:\\Users\\jaked\\Downloads\\TankWars\\Images\\Background.png");
+            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
             int width = i.Width;
             int height = i.Height;
             Rectangle destinationRect = new Rectangle(0, 0, worldSize, worldSize);

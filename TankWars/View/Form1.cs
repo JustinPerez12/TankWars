@@ -17,7 +17,7 @@ namespace View {
     {
 
         Controller controller;
-        DrawingPanel dPanel;
+        DrawingPanel panel;
         World theWorld;
 
         private const int viewSize = 800;
