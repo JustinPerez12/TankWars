@@ -10,7 +10,9 @@ using GameController;
 using Model;
 
 namespace View {
-    public class DrawingPanel : Panel {
+    public class DrawingPanel : Panel 
+    {
+
         private World theWorld;
         private Controller controller;
         private int scale = 4;

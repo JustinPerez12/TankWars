@@ -6,9 +6,12 @@ using Model;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Windows.Forms;
+using System.Net.Sockets;
 
-namespace GameController {
-    public class Controller {
+namespace GameController
+{
+    public class Controller
+    {
 
         private World theWorld;
         private int worldSize;
@@ -39,6 +42,7 @@ namespace GameController {
         {
             Networking.ConnectToServer(OnConnect, address, 11000);
         }
+
 
         /// <summary>
         /// Method to be invoked by the networking library when a connection is made
@@ -114,7 +118,7 @@ namespace GameController {
                 // "messages" is the big message text box in the form.
                 // We must use a MethodInvoker, because only the thread 
                 // that created the GUI can modify it.
-                
+
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
@@ -156,7 +160,7 @@ namespace GameController {
                         items.Add(proj);
                     }
 
-                    else if(powerupValue != null)
+                    else if (powerupValue != null)
                     {
                         Powerup power = null;
                         power = JsonConvert.DeserializeObject<Powerup>(p);
@@ -165,7 +169,7 @@ namespace GameController {
                         theWorld.Powerups.Add(power.getPowerNum(), power);
                         items.Add(power);
                     }
-                } 
+                }
                 catch (Exception)
                 {
                         ID = int.Parse(parts[0]);
@@ -183,6 +187,21 @@ namespace GameController {
         public void MessageEntered(string message)
         {
             Networking.Send(theServer.TheSocket, message + "/n");
+        }
+
+        /// <summary>
+        /// Private helper method to Handle the form closing by shutting down the socket cleanly
+        /// </summary>
+        /// <returns></returns>
+        public bool Exit()
+        {
+            if (theServer != null)
+            {
+                theServer.TheSocket.Shutdown(SocketShutdown.Both);
+                return true;
+            }
+
+            return false;
         }
     }
 }

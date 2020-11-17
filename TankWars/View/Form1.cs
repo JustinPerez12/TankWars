@@ -13,10 +13,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace View {
-    public partial class Form1 : Form {
+    public partial class Form1 : Form 
+    {
 
         Controller controller;
-        DrawingPanel panel;
+        DrawingPanel dPanel;
         World theWorld;
 
         private const int viewSize = 800;
@@ -40,6 +41,7 @@ namespace View {
             panel.Size = new Size(viewSize, viewSize);
             this.Controls.Add(panel);
 
+            //need to take this out later
             serverAddress.Text = "localhost";
 
             FormClosed += OnExit;
@@ -77,8 +79,7 @@ namespace View {
         /// <param name="e"></param>
         private void OnExit(object sender, FormClosedEventArgs e)
         {
-            /*if (theServer != null)
-                theServer.TheSocket.Shutdown(SocketShutdown.Both);*/
+            controller.Exit();
         }
 
         /// <summary>
@@ -98,6 +99,7 @@ namespace View {
                 MessageBox.Show("Please enter a name");
                 return;
             }
+
             // Disable the controls and try to connect
             connectButton.Enabled = false;
             serverAddress.Enabled = false;

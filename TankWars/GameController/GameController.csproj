@@ -10,7 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj" />
-    <ProjectReference Include="..\NetworkController\NetworkController.csproj" />
   </ItemGroup>
 
   <ItemGroup>
