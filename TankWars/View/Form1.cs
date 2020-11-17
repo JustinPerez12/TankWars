@@ -17,7 +17,7 @@ namespace View {
     {
 
         Controller controller;
-        DrawingPanel dPanel;
+        DrawingPanel panel;
         World theWorld;
 
         private const int viewSize = 800;
@@ -142,15 +142,5 @@ namespace View {
             }
         }
 
-        /// <summary>
-        /// Private helper method. May delete this later 
-        /// </summary>
-        private void setName()
-        {
-            string name = nameBox.Text;
-            nameBox.Enabled = false;
-            this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
-
-        }
     }
 }

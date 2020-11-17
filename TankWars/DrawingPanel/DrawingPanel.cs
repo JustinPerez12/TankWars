@@ -127,17 +127,15 @@ namespace View {
             RectangleF sourceRect = new RectangleF(0, 0, scale * width, scale * height);
             //RectangleF destinationRect = new RectangleF(0, 0, .75f * width, .75f * height);
             e.Graphics.DrawImage(i, sourceRect, sourceRect, GraphicsUnit.Pixel);
-
-            //e.Graphics.DrawImage(i, 0,0);
         }
 
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
+
             lock(theWorld)
             {
-                DrawObjectWithTransform(e, null, theWorld.size, 0, 0, 0, BackgroundDrawer);
+                //DrawObjectWithTransform(e, null, theWorld.size, 0, 0, 0, BackgroundDrawer);
 
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
