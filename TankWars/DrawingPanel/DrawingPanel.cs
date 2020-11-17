@@ -9,8 +9,9 @@ using System.Windows.Forms;
 using GameController;
 using Model;
 
-namespace View {
-    public class DrawingPanel : Panel 
+namespace View
+{
+    public class DrawingPanel : Panel
     {
 
         private World theWorld;
@@ -59,8 +60,8 @@ namespace View {
 
             int x = WorldSpaceToImageSpace(worldSize, worldX);
             int y = WorldSpaceToImageSpace(worldSize, worldY);
-/*            int x = 00;
-            int y = 0;*/
+            /*            int x = 00;
+                        int y = 0;*/
             e.Graphics.TranslateTransform(x, y);
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
@@ -140,7 +141,7 @@ namespace View {
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            if(theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
+            if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
             {
                 double playerY = player.GetLocationY();
                 double playerX = player.GetLocationX();
@@ -156,7 +157,7 @@ namespace View {
             }
 
             //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
-            lock(theWorld)
+            lock (theWorld)
             {
                 BackgroundDrawer(null, e);
 
