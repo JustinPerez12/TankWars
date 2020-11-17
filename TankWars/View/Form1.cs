@@ -20,7 +20,7 @@ namespace View {
         DrawingPanel dPanel;
         World theWorld;
 
-        private const int viewSize = 500;
+        private const int viewSize = 800;
         private const int menuSize = 40;
 
 
@@ -36,10 +36,11 @@ namespace View {
             controller.name += setName;
 
             theWorld = controller.getWorld();
-            dPanel = new DrawingPanel(theWorld);
-            dPanel.Location = new Point(0, menuSize);
-            dPanel.Size = new Size(viewSize, viewSize);
-            this.Controls.Add(dPanel);
+            panel = new DrawingPanel(theWorld);
+            //panel.Location = new Point(0, menuSize);
+            panel.Location = new Point(0, menuSize);
+            panel.Size = new Size(viewSize, viewSize);
+            this.Controls.Add(panel);
 
             //need to take this out later
             serverAddress.Text = "localhost";
@@ -54,14 +55,25 @@ namespace View {
 
         private void DisplayInput(IEnumerable<object> newInput)
         {
-            foreach (object p in newInput)
+            lock (theWorld)
             {
-                
-                MethodInvoker invalidator = new MethodInvoker(() => this.Invalidate(true));
-                this.Invoke(invalidator);
+                foreach (object p in newInput)
+                {
+                    MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
+                    Invoke(mi);
+
+                }
+
             }
         }
 
+        private void setName()
+        {
+            string name = nameBox.Text;
+            nameBox.Enabled = false;
+            this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
+
+        }
 
         /// <summary>
         /// Handle the form closing by shutting down the socket cleanly

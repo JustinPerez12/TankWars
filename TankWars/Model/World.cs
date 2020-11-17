@@ -17,7 +17,6 @@ namespace Model {
             Projectiles = new Dictionary<int, Projectile>();
             Walls = new Dictionary<int, Wall>();
             Powerups = new Dictionary<int, Powerup>();
-
             size = _size;
         }
     }

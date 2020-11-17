@@ -23,19 +23,9 @@ namespace Model {
 
         }
 
-        public int GetWallNum()
+        public int getWallNum()
         {
             return wallNum;
-        }
-
-        public Vector2D GetP1()
-        {
-            return p1;
-        }
-
-        public Vector2D GetP2()
-        {
-            return p2;
         }
 
     }

@@ -7,7 +7,8 @@ using TankWars;
 namespace Model {
     public class Projectile {
 
-        [JsonProperty(PropertyName = "proj")]
+
+        [JsonProperty(PropertyName = "Proj")]
         private int projNum;
 
         [JsonProperty(PropertyName = "loc")]
@@ -20,13 +21,14 @@ namespace Model {
         private bool died;
 
         [JsonProperty(PropertyName = "owner")]
-        private int ownerNum;
+        private int tankID;
+
         public Projectile()
         {
 
         }
 
-        public int GetProjNum()
+        public int getProjnum()
         {
             return projNum;
         }
@@ -43,9 +45,24 @@ namespace Model {
         {
             return location;
         }
+
+        public double GetLocationX()
+        {
+            return location.GetX();
+        }
+
+        public double GetLocationY()
+        {
+            return location.GetY();
+        }
         public Vector2D GetDirection()
         {
             return direction;
+        }
+
+        public double GetDirectionAngle()
+        {
+            return direction.ToAngle();
         }
         public void SetLocation(Vector2D l)
         {

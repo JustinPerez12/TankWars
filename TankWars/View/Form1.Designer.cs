@@ -81,9 +81,9 @@
             // 
             // messageToSendBox
             // 
-            this.messageToSendBox.Location = new System.Drawing.Point(12, 414);
+            this.messageToSendBox.Location = new System.Drawing.Point(15, 929);
             this.messageToSendBox.Name = "messageToSendBox";
-            this.messageToSendBox.Size = new System.Drawing.Size(756, 20);
+            this.messageToSendBox.Size = new System.Drawing.Size(903, 20);
             this.messageToSendBox.TabIndex = 5;
             // 
             // contextMenuStrip1
@@ -95,7 +95,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(780, 446);
+            this.ClientSize = new System.Drawing.Size(930, 961);
             this.Controls.Add(this.messageToSendBox);
             this.Controls.Add(this.nameLabel);
             this.Controls.Add(this.serverLabel);

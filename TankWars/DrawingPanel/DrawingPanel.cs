@@ -12,6 +12,8 @@ namespace View {
     {
 
         private World theWorld;
+        private int scale = 4;
+
         public DrawingPanel(World w)
         {
             this.DoubleBuffered = true;
@@ -48,9 +50,11 @@ namespace View {
         {
             // "push" the current transform
             System.Drawing.Drawing2D.Matrix oldMatrix = e.Graphics.Transform.Clone();
-
+            /*
             int x = WorldSpaceToImageSpace(worldSize, worldX);
-            int y = WorldSpaceToImageSpace(worldSize, worldY);
+            int y = WorldSpaceToImageSpace(worldSize, worldY);*/
+            int x = 0;
+            int y = 0;
             e.Graphics.TranslateTransform(x, y);
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
@@ -70,8 +74,8 @@ namespace View {
         {
             Tank p = o as Tank;
 
-            int width = 30;
-            int height = 30;
+            int width = 30 * scale;
+            int height = 30 * scale;
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             using (System.Drawing.SolidBrush blueBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Blue))
             using (System.Drawing.SolidBrush greenBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Green))
@@ -84,6 +88,7 @@ namespace View {
                 e.Graphics.FillRectangle(greenBrush, r);
             }
         }
+
 
         /// <summary>
         /// Acts as a drawing delegate for DrawObjectWithTransform
@@ -109,47 +114,55 @@ namespace View {
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
 
 
-                //all this does is paint the circle a diffenret color depending on kind. nothing special just makes them different colors in lab12
-               /* if (p.GetKind() == 1) // red powerup
-                    e.Graphics.FillEllipse(redBrush, r);
-                if (p.GetKind() == 2) // yellow powerup
-                    e.Graphics.FillEllipse(yellowBrush, r);
-                if (p.GetKind() == 3) // black powerup*/
                 e.Graphics.FillEllipse(blackBrush, r);
             }
         }
 
 
+        private void BackgroundDrawer(object o, PaintEventArgs e)
+        {
+            Image i = Image.FromFile("c:\\Users\\jaked\\Downloads\\TankWars\\Images\\Background.png");
+            int width = i.Width;
+            int height = i.Height;
+            RectangleF sourceRect = new RectangleF(0, 0, scale * width, scale * height);
+            //RectangleF destinationRect = new RectangleF(0, 0, .75f * width, .75f * height);
+            e.Graphics.DrawImage(i, sourceRect, sourceRect, GraphicsUnit.Pixel);
+
+            //e.Graphics.DrawImage(i, 0,0);
+        }
+
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-
-            //This is how we are going to draw our tanks, walls, etc.. 
-            // we need to store them in dictionaries in world class then for each one we draw. 
-            // Draw the players
-            lock (theWorld)
+            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
+            lock(theWorld)
             {
+                DrawObjectWithTransform(e, null, theWorld.size, 0, 0, 0, BackgroundDrawer);
+
+                // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, theWorld.size, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+                    DrawObjectWithTransform(e, tank, theWorld.size, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
                 }
-
                 // Draw the powerups
                 foreach (Powerup pow in theWorld.Powerups.Values)
                 {
-                    DrawObjectWithTransform(e, pow, theWorld.size, pow.GetLocation().GetX(), pow.GetLocation().GetY(), 0, PowerupDrawer);
+                    DrawObjectWithTransform(e, pow, theWorld.size, pow.GetLocationX(), pow.GetLocationY(), 0, PowerupDrawer);
                 }
 
-                foreach(Projectile proj in theWorld.Projectiles.Values)
+                foreach (Projectile proj in theWorld.Projectiles.Values)
                 {
-                    DrawObjectWithTransform(e, proj, theWorld.size, proj.GetLocation().GetX(), proj.GetLocation().GetY(), 0, PowerupDrawer);
+                    DrawObjectWithTransform(e, proj, theWorld.size, proj.GetLocationX(), proj.GetLocationY(), proj.GetDirectionAngle(), TankDrawer);
                 }
 
-                //i understand how to draw the other three objects but the wall is given a P1 and a P2 which both seem to act as locations with their own seperate X and Y. How do I draw walls?
-                /*foreach(Wall wall in theWorld.Walls.Values)
+
+                /*foreach (Wall wall in theWorld.Walls.Values)
                 {
-                    DrawObjectWithTransform(e, wall, theWorld.size, wall.GetP1()., wall.GetLocation().GetY(), 0, PowerupDrawer);
+                    DrawObjectWithTransform(e, wall, theWorld.size, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
                 }*/
+
+                // Do anything that Panel (from which we inherit) needs to do
+                base.OnPaint(e);
             }
         }
 
