@@ -7,6 +7,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Net.Sockets;
+using System.Diagnostics;
 
 namespace GameController {
     public class Controller {
@@ -15,6 +16,10 @@ namespace GameController {
         private int worldSize;
         private int ID;
 
+        public string moving;
+        public string fire;
+        public string x;
+        public string y;
 
         public delegate void InputHandler(IEnumerable<object> text);
         public event InputHandler InputArrived;
@@ -22,14 +27,15 @@ namespace GameController {
         public delegate void ErrorEvent(string message);
         public event ErrorEvent error;
 
-        public delegate void SetName();
-        public event SetName name;
-
         SocketState theServer = null;
 
         public Controller()
         {
             theWorld = new World(worldSize);
+            moving = "none";
+            fire = "none";
+            x = "0";
+            y = "0";
         }
 
         public World getWorld()
@@ -57,7 +63,6 @@ namespace GameController {
                 return;
             }
             theServer = state;
-            //name();
 
             // Start an event loop to receive messages from the server
             state.OnNetworkAction = ReceiveMessage;
@@ -74,8 +79,6 @@ namespace GameController {
         {
             if (state.ErrorOccured)
             {
-                // TODO: Left as an exercise, allow the user to try to reconnect
-                //MessageBox.Show("Error while receiving. Please restart the client.");
                 error(state.ErrorMessage);
                 return;
             }
@@ -140,6 +143,7 @@ namespace GameController {
                             {
                                 theWorld.Tanks.Remove(tank.GetID());
                                 theWorld.Tanks.Add(tank.GetID(), tank);
+                                items.Add(tank);
                                 continue;
                             }
                             theWorld.Tanks.Add(tank.GetID(), tank);
@@ -180,27 +184,40 @@ namespace GameController {
                     ID = int.Parse(parts[0]);
                     worldSize = int.Parse(parts[1]);
                 }
-                
-                InputArrived(items);
-
             }
+            sendMessage();
+            InputArrived(items);
         }
 
+        public void sendMessage()
+        {
+            MessageEntered("{\"moving\":\""+ moving +"\",\"fire\":\""+ fire +"\",\"tdir\":{\"x\":"+ x +",\"y\":"+ y +"}}");
+        }
 
 
         public void HandleMoveRequest(KeyEventArgs e)
         {
-            string isMoving = "none";
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.KeyCode == Keys.W)
-                MessageEntered("{\"moving\":\"up\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            {
+                Debug.WriteLine("moving up");
+                moving = "up";
+            }
             if (e.KeyCode == Keys.A)
-                MessageEntered("{\"moving\":\"left\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            {
+                Debug.WriteLine("moving left");
+                moving = "left";
+            }
             if (e.KeyCode == Keys.S)
-                MessageEntered("{\"moving\":\"down\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            {
+                Debug.WriteLine("moving down");
+                moving = "down";
+            }
             if (e.KeyCode == Keys.D)
-                MessageEntered("{\"moving\":\"right\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
-            // MessageEntered("{\"moving\":\"" + isMoving + "\",\"fire\":\"+ fire +\",\"tdir\":{\"x\":1,\"y\":0}}");
+            {
+                Debug.WriteLine("moving right");
+                moving = "right";
+            }
         }
 
 

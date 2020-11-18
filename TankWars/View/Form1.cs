@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -21,11 +22,6 @@ namespace View {
 
         private const int viewSize = 800;
         private const int menuSize = 40;    
-
-        public string moving;
-        public string fire;
-        public string x;
-        public string y;
         public Form1()
         {
             InitializeComponent();
@@ -33,8 +29,6 @@ namespace View {
             controller = new Controller();
             controller.InputArrived += DisplayInput;
             controller.error += ErrorEvent;
-
-            controller.name += setName;
 
 
             theWorld = controller.getWorld();
@@ -51,10 +45,7 @@ namespace View {
 
             this.KeyDown += HandleKeyDown;
 
-            moving = "none";
-            fire = "none";
-            x = "0";
-            y = "0";
+
         }
 
         private void ErrorEvent(string message)
@@ -72,16 +63,8 @@ namespace View {
                     Invoke(mi);
                 }
             }
-            //controller.MessageEntered(CreateJSON());
         }
 
-        private void setName()
-        {
-            string name = nameBox.Text;
-            nameBox.Enabled = false;
-            this.Invoke(new MethodInvoker(() => controller.MessageEntered(name)));
-
-        }
 
         /// <summary>
         /// Handle the form closing by shutting down the socket cleanly
@@ -124,42 +107,27 @@ namespace View {
 
         private void HandleKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.W)
-            {
-                moving = "up";
-                controller.HandleMoveRequest(e);
-            }
-            if (e.KeyCode == Keys.A)
-            {
-                moving = "left";
-                controller.HandleMoveRequest(e);
-            }
-            if (e.KeyCode == Keys.S)
-            {
-                moving = "down";
-                controller.HandleMoveRequest(e);
-            }
-            if (e.KeyCode == Keys.D)
-            {
-                moving = "right";
-                controller.HandleMoveRequest(e);
-            }
+            Debug.WriteLine("button clicked");
+            controller.HandleMoveRequest(e);
 
             e.Handled = true;
         }
 
         private void HandleKeyUp(object sender, KeyEventArgs e)
         {
-
-
             // e.SuppressKeyPress = true;
             e.Handled = true;
         }
 
-        private string CreateJSON()
+
+        private void HandleMouseDown(object sender, MouseEventArgs e)
         {
-            string message = "{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + x + ",\"y\":" + y + "}}";
-            return message;
+
+        }
+
+        private void HandleMouseUp(object sender, MouseEventArgs e)
+        {
+
         }
     }
 }

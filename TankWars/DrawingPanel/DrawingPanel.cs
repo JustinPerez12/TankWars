@@ -155,7 +155,6 @@ namespace View
                 e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
             }
 
-            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
             lock (theWorld)
             {
                 BackgroundDrawer(null, e);
@@ -210,8 +209,9 @@ namespace View
                 }
 
                 // Do anything that Panel (from which we inherit) needs to do
-                base.OnPaint(e);
+               
             }
+            base.OnPaint(e);
         }
 
         private void TurretDrawer(object o, PaintEventArgs e)
