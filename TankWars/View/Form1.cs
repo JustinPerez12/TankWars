@@ -13,17 +13,19 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace View {
-    public partial class Form1 : Form 
-    {
+    public partial class Form1 : Form {
 
         Controller controller;
         DrawingPanel panel;
         World theWorld;
 
         private const int viewSize = 800;
-        private const int menuSize = 40;
+        private const int menuSize = 40;    
 
-
+        public string moving;
+        public string fire;
+        public string x;
+        public string y;
         public Form1()
         {
             InitializeComponent();
@@ -33,6 +35,7 @@ namespace View {
             controller.error += ErrorEvent;
 
             controller.name += setName;
+
 
             theWorld = controller.getWorld();
             panel = new DrawingPanel(theWorld, controller);
@@ -45,6 +48,13 @@ namespace View {
             serverAddress.Text = "localhost";
 
             FormClosed += OnExit;
+
+            this.KeyDown += HandleKeyDown;
+
+            moving = "none";
+            fire = "none";
+            x = "0";
+            y = "0";
         }
 
         private void ErrorEvent(string message)
@@ -62,6 +72,7 @@ namespace View {
                     Invoke(mi);
                 }
             }
+            //controller.MessageEntered(CreateJSON());
         }
 
         private void setName()
@@ -109,7 +120,46 @@ namespace View {
             string name = nameBox.Text;
             nameBox.Enabled = false;
             controller.MessageEntered(name);
-            //Networking.ConnectToServer(OnConnect, serverAddress.Text, 11000);
+        }
+
+        private void HandleKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W)
+            {
+                moving = "up";
+                controller.HandleMoveRequest(e);
+            }
+            if (e.KeyCode == Keys.A)
+            {
+                moving = "left";
+                controller.HandleMoveRequest(e);
+            }
+            if (e.KeyCode == Keys.S)
+            {
+                moving = "down";
+                controller.HandleMoveRequest(e);
+            }
+            if (e.KeyCode == Keys.D)
+            {
+                moving = "right";
+                controller.HandleMoveRequest(e);
+            }
+
+            e.Handled = true;
+        }
+
+        private void HandleKeyUp(object sender, KeyEventArgs e)
+        {
+
+
+            // e.SuppressKeyPress = true;
+            e.Handled = true;
+        }
+
+        private string CreateJSON()
+        {
+            string message = "{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + x + ",\"y\":" + y + "}}";
+            return message;
         }
     }
 }

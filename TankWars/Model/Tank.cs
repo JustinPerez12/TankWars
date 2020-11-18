@@ -21,7 +21,7 @@ namespace Model
         private Vector2D orientation;
 
         [JsonProperty(PropertyName = "tdir")]
-        private Vector2D aiming = new Vector2D(0, -1);
+        private Vector2D aiming;
 
         [JsonProperty(PropertyName = "name")]
         private string name;

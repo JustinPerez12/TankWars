@@ -8,14 +8,13 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Net.Sockets;
 
-namespace GameController
-{
-    public class Controller
-    {
+namespace GameController {
+    public class Controller {
 
         private World theWorld;
         private int worldSize;
         private int ID;
+
 
         public delegate void InputHandler(IEnumerable<object> text);
         public event InputHandler InputArrived;
@@ -67,7 +66,7 @@ namespace GameController
         }
 
         /// <summary>
-        /// Method to be invoked by th e networking library when 
+        /// Method to be invoked by the networking library when 
         /// a network action occurs (see lines 70-71)
         /// </summary>
         /// <param name="state"></param>
@@ -131,53 +130,79 @@ namespace GameController
                     JToken wallValue = obj["wall"];
                     JToken projValue = obj["proj"];
                     JToken powerupValue = obj["power"];
+                    lock (theWorld)
+                    {
+                        if (tankValue != null)
+                        {
+                            Tank tank = null;
+                            tank = JsonConvert.DeserializeObject<Tank>(p);
+                            if (theWorld.Tanks.ContainsKey(tank.GetID()))
+                            {
+                                theWorld.Tanks.Remove(tank.GetID());
+                                theWorld.Tanks.Add(tank.GetID(), tank);
+                                continue;
+                            }
+                            theWorld.Tanks.Add(tank.GetID(), tank);
+                            items.Add(tank);
+                        }
+                        else if (wallValue != null)
+                        {
+                            Wall wall = null;
+                            wall = JsonConvert.DeserializeObject<Wall>(p);
+                            if (theWorld.Walls.ContainsKey(wall.getWallNum()))
+                                continue;
+                            theWorld.Walls.Add(wall.getWallNum(), wall);
+                            items.Add(wall);
+                        }
+                        else if (projValue != null)
+                        {
+                            Projectile proj = null;
+                            proj = JsonConvert.DeserializeObject<Projectile>(p);
+                            if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
+                                continue;
+                            theWorld.Projectiles.Add(proj.getProjnum(), proj);
+                            items.Add(proj);
+                        }
 
-                    if (tankValue != null)
-                    {
-                        Tank tank = null;
-                        tank = JsonConvert.DeserializeObject<Tank>(p);
-                        if (theWorld.Tanks.ContainsKey(tank.GetID()))
-                            continue;
-                        theWorld.Tanks.Add(tank.GetID(), tank);
-                        items.Add(tank);
-                    }
-                    else if (wallValue != null)
-                    {
-                        Wall wall = null;
-                        wall = JsonConvert.DeserializeObject<Wall>(p);
-                        if (theWorld.Walls.ContainsKey(wall.getWallNum()))
-                            continue;
-                        theWorld.Walls.Add(wall.getWallNum(), wall);
-                        items.Add(wall);
-                    }
-                    else if (projValue != null)
-                    {
-                        Projectile proj = null;
-                        proj = JsonConvert.DeserializeObject<Projectile>(p);
-                        if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
-                            continue;
-                        theWorld.Projectiles.Add(proj.getProjnum(), proj);
-                        items.Add(proj);
-                    }
-
-                    else if (powerupValue != null)
-                    {
-                        Powerup power = null;
-                        power = JsonConvert.DeserializeObject<Powerup>(p);
-                        if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
-                            continue;
-                        theWorld.Powerups.Add(power.getPowerNum(), power);
-                        items.Add(power);
+                        else if (powerupValue != null)
+                        {
+                            Powerup power = null;
+                            power = JsonConvert.DeserializeObject<Powerup>(p);
+                            if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
+                                continue;
+                            theWorld.Powerups.Add(power.getPowerNum(), power);
+                            items.Add(power);
+                        }
                     }
                 }
                 catch (Exception)
                 {
-                        ID = int.Parse(parts[0]);
-                        worldSize = int.Parse(parts[1]);
+                    ID = int.Parse(parts[0]);
+                    worldSize = int.Parse(parts[1]);
                 }
+                
+                InputArrived(items);
+
             }
-            InputArrived(items);
         }
+
+
+
+        public void HandleMoveRequest(KeyEventArgs e)
+        {
+            string isMoving = "none";
+            theWorld.Tanks.TryGetValue(ID, out Tank t);
+            if (e.KeyCode == Keys.W)
+                MessageEntered("{\"moving\":\"up\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            if (e.KeyCode == Keys.A)
+                MessageEntered("{\"moving\":\"left\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            if (e.KeyCode == Keys.S)
+                MessageEntered("{\"moving\":\"down\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            if (e.KeyCode == Keys.D)
+                MessageEntered("{\"moving\":\"right\",\"fire\":\"main\",\"tdir\":{\"x\":1,\"y\":0}}");
+            // MessageEntered("{\"moving\":\"" + isMoving + "\",\"fire\":\"+ fire +\",\"tdir\":{\"x\":1,\"y\":0}}");
+        }
+
 
         public int getID()
         {
@@ -186,7 +211,7 @@ namespace GameController
 
         public void MessageEntered(string message)
         {
-            Networking.Send(theServer.TheSocket, message + "/n");
+            Networking.Send(theServer.TheSocket, message + "\n");
         }
 
         /// <summary>
