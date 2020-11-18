@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using GameController;
 using Model;
+using TankWars;
 
 namespace View
 {
@@ -16,10 +18,8 @@ namespace View
 
         private World theWorld;
         private Controller controller;
-        private int scale = 4;
         private int viewSize = 800;
         private int worldSize = 2000;
-        private int clientID;
 
         public DrawingPanel(World w, Controller controller1)
         {
@@ -64,6 +64,7 @@ namespace View
             /*            int x = 00;
                         int y = 0;*/
             e.Graphics.TranslateTransform(x, y);
+            //Debug.WriteLine(angle.ToString());
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
 
@@ -82,20 +83,18 @@ namespace View
         {
             Tank tank = o as Tank;
             Image i = Image.FromFile("..\\..\\..\\Resources\\images\\RedTank.png");
-            e.Graphics.DrawImage(i, 0, 0);
+            e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
         }
 
         private void WallDrawer(object o, PaintEventArgs e)
         {
             Wall wall = o as Wall;
             Image i = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
-            e.Graphics.DrawImage(i, 0, 0);
+            e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
         }
 
         private Color teamColor(Tank o)
         {
-            
-
             return Color.Red;
         }
 
@@ -121,12 +120,31 @@ namespace View
                 // So if we want the circle centered on the powerup's location, we have to offset it
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-
-
                 e.Graphics.FillEllipse(blackBrush, r);
             }
         }
 
+        private void ProjectileDrawer(object o, PaintEventArgs e)
+        {
+            Projectile p = o as Projectile;
+            int ID = p.GetOwner();
+            if (theWorld.Tanks.TryGetValue(ID, out Tank player))
+            {
+                string color = player.Color();
+                Image i = Image.FromFile("..\\..\\..\\Resources\\images\\shot-" + color + ".png");
+                int width = i.Width;
+                int height = i.Height;
+
+                e.Graphics.DrawImage(i, 0, 0);
+            }
+        }
+
+        private void TurretDrawer(object o, PaintEventArgs e)
+        {
+            Tank tank = o as Tank;
+            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\RedTurret.png");
+            e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
+        }
 
         private void BackgroundDrawer(object o, PaintEventArgs e)
         {
@@ -142,8 +160,8 @@ namespace View
         {
             if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
             {
-                double playerY = player.GetLocationY();
-                double playerX = player.GetLocationX();
+                double playerY = player.GetLocation().GetY();
+                double playerX = player.GetLocation().GetX();
 
                 //double ratio = (double)viewSize / (double)theWorld.getSize();
                 double ratio = (double)viewSize / (double)2000;
@@ -162,64 +180,56 @@ namespace View
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
-                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TankDrawer);
-                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocationX(), tank.GetLocationY(), tank.GetOrientationAngle(), TurretDrawer);
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+
+                    //normalize the vector then pass into turretdrawer
+                    tank.TurretOrientation().Normalize();
+                    //DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
                 }
+
                 // Draw the powerups
                 foreach (Powerup pow in theWorld.Powerups.Values)
-                {
-                    DrawObjectWithTransform(e, pow, worldSize, pow.GetLocationX(), pow.GetLocationY(), 0, PowerupDrawer);
-                }
+                    DrawObjectWithTransform(e, pow, worldSize, pow.getLocation().GetX(), pow.getLocation().GetY(), 0, PowerupDrawer);
 
                 foreach (Projectile proj in theWorld.Projectiles.Values)
-                {
-                    //DrawObjectWithTransform(e, proj, worldSize, proj.GetLocationX(), proj.GetLocationY(), proj.GetDirectionAngle(), TankDrawer);
-                }
-
+                    DrawObjectWithTransform(e, proj, worldSize, proj.GetLocation().GetX(), proj.GetLocation().GetY(), proj.GetDirectionAngle(), ProjectileDrawer);
 
                 foreach (Wall wall in theWorld.Walls.Values)
-                {
-                    int numofwalls = wall.numofWalls(out bool isVertical, out bool p1Greater);
-
-                    int y = (int)wall.getP1().GetY();
-                    int x = (int)wall.getP1().GetX();
-                    for (int i = 0; i < numofwalls; i++)
-                    {
-                        if (isVertical)
-                        {
-                            
-                            DrawObjectWithTransform(e, wall, theWorld.size, wall.getP2().GetX(), y, 0, WallDrawer);
-                            if (p1Greater)
-                                y -= 50;
-                            else
-                                y += 50;
-                        }
-
-                        else
-                        {
-                            DrawObjectWithTransform(e, wall, theWorld.size, x, wall.getP2().GetY(), 0, WallDrawer);
-                            if (p1Greater)
-                                x -= 50;
-                            else
-                                x += 50;
-                        }
-
-                    }
-
-                }
-
-                // Do anything that Panel (from which we inherit) needs to do
-               
+                    DrawWall(wall, e);
             }
+            // Do anything that Panel(from which we inherit) needs to do
             base.OnPaint(e);
         }
 
-        private void TurretDrawer(object o, PaintEventArgs e)
+        private void DrawWall(Wall wall, PaintEventArgs e)
         {
-            Tank tank = o as Tank;
-            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\RedTurret.png");
-            e.Graphics.DrawImage(i, 0, 0);
+            int numofwalls = wall.numofWalls(out bool isVertical, out bool p1Greater);
+            int y = (int)wall.getP1().GetY();
+            int x = (int)wall.getP1().GetX();
+            for (int i = 0; i <= numofwalls; i++)
+            {
+                if (isVertical)
+                {
+
+                    DrawObjectWithTransform(e, wall, theWorld.size, wall.getP2().GetX(), y, 0, WallDrawer);
+                    if (p1Greater)
+                        y -= 50;
+                    else
+                        y += 50;
+                }
+
+                else
+                {
+                    DrawObjectWithTransform(e, wall, theWorld.size, x, wall.getP2().GetY(), 0, WallDrawer);
+                    if (p1Greater)
+                        x -= 50;
+                    else
+                        x += 50;
+                }
+            }
         }
+
+
     }
 }
 

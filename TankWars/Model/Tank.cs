@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Text;
 using TankWars;
 
@@ -41,9 +42,25 @@ namespace Model
         [JsonProperty(PropertyName = "join")]
         private bool joined;
 
+        private string color;
 
         public Tank()
         {
+            color = RandomColor();
+        }
+
+        private string RandomColor()
+        {
+            List<string> colors = new List<string>() { "blue", "brown", "green", "grey", "red", "violet", "white", "yellow" };
+            Random random = new Random();
+            int i = random.Next(0,8);
+
+            return colors[i];
+        }
+
+        public string Color()
+        {
+            return color;
         }
 
         public void Deactivate()
@@ -73,27 +90,11 @@ namespace Model
             return location;
         }
 
-        //Might delete later
-        public double GetLocationX()
-        {
-            return location.GetX();
-        }
-
-        //Might delete later
-        public double GetLocationY()
-        {
-            return location.GetY();
-        }
         public Vector2D GetOrientation()
         {
             return orientation;
         }
 
-        //Might delete later
-        public double GetOrientationAngle()
-        {
-            return orientation.ToAngle();
-        }
         public void SetLocation(Vector2D l)
         {
             location = l;
@@ -105,8 +106,18 @@ namespace Model
 
         public bool hasPowerup()
         {
-            //need to implement. this is how we will tell if a tank has picked up a powerup. dont know how to do this yet tho lol.
+            //need to implement. this is how we will tell if a tank has picked up a powerup. dont know how to do this yet tho
             return true;
+        }
+
+        public Vector2D TurretOrientation()
+        {
+            return aiming;
+        }
+
+        public void SetTurretOrientation(double x, double y)
+        {
+            aiming = new Vector2D(x, y);
         }
     }
 }
