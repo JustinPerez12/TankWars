@@ -91,6 +91,7 @@ namespace GameController {
 
             //not sure if this is where this goes but it was working on the provided TankWars Client
             sendMessage();
+
         }
 
         /// <summary>
