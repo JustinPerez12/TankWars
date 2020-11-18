@@ -58,7 +58,6 @@ namespace GameController {
         {
             if (state.ErrorOccured)
             {
-                // TODO: Left as an exercise, allow the user to try to reconnect
                 error(state.ErrorMessage);
                 return;
             }
@@ -72,7 +71,7 @@ namespace GameController {
 
         /// <summary>
         /// Method to be invoked by the networking library when 
-        /// a network action occurs (see lines 70-71)
+        /// a network action occurs 
         /// </summary>
         /// <param name="state"></param>
         private void ReceiveMessage(SocketState state)
@@ -89,6 +88,9 @@ namespace GameController {
             // so this same method (ReceiveMessage) 
             // will be invoked when more data arrives
             Networking.GetData(state);
+
+            //not sure if this is where this goes but it was working on the provided TankWars Client
+            sendMessage();
         }
 
         /// <summary>
@@ -120,7 +122,6 @@ namespace GameController {
                 // "messages" is the big message text box in the form.
                 // We must use a MethodInvoker, because only the thread 
                 // that created the GUI can modify it.
-
 
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
@@ -185,51 +186,11 @@ namespace GameController {
                     worldSize = int.Parse(parts[1]);
                 }
             }
-            sendMessage();
             InputArrived(items);
+            //sendMessage();
+
         }
 
-        public void sendMessage()
-        {
-            MessageEntered("{\"moving\":\""+ moving +"\",\"fire\":\""+ fire +"\",\"tdir\":{\"x\":"+ x +",\"y\":"+ y +"}}");
-        }
-
-
-        public void HandleMoveRequest(KeyEventArgs e)
-        {
-            theWorld.Tanks.TryGetValue(ID, out Tank t);
-            if (e.KeyCode == Keys.W)
-            {
-                Debug.WriteLine("moving up");
-                moving = "up";
-            }
-            if (e.KeyCode == Keys.A)
-            {
-                Debug.WriteLine("moving left");
-                moving = "left";
-            }
-            if (e.KeyCode == Keys.S)
-            {
-                Debug.WriteLine("moving down");
-                moving = "down";
-            }
-            if (e.KeyCode == Keys.D)
-            {
-                Debug.WriteLine("moving right");
-                moving = "right";
-            }
-        }
-
-
-        public int getID()
-        {
-            return ID;
-        }
-
-        public void MessageEntered(string message)
-        {
-            Networking.Send(theServer.TheSocket, message + "\n");
-        }
 
         /// <summary>
         /// Private helper method to Handle the form closing by shutting down the socket cleanly
@@ -244,6 +205,87 @@ namespace GameController {
             }
 
             return false;
+        }
+
+        public void HandleMoveRequest(KeyEventArgs e)
+        {
+            theWorld.Tanks.TryGetValue(ID, out Tank t);
+            if (e.KeyCode == Keys.W)
+            {
+                //Debug.WriteLine("moving up");
+                moving = "up";
+            }
+            else if (e.KeyCode == Keys.A)
+            {
+                //Debug.WriteLine("moving left");
+                moving = "left";
+            }
+            else if (e.KeyCode == Keys.S)
+            {
+                //Debug.WriteLine("moving down");
+                moving = "down";
+            }
+            else if (e.KeyCode == Keys.D)
+            {
+               // Debug.WriteLine("moving right");
+                moving = "right";
+            }
+        }
+
+        public void HandleMoveCancel(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W)
+            {
+                //Debug.WriteLine("moving up");
+                moving = "none";
+            }
+            else if (e.KeyCode == Keys.A)
+            {
+                //Debug.WriteLine("moving left");
+                moving = "none";
+            }
+            else if (e.KeyCode == Keys.S)
+            {
+                //Debug.WriteLine("moving down");
+                moving = "none";
+            }
+            else if (e.KeyCode == Keys.D)
+            {
+                //Debug.WriteLine("moving right");
+                moving = "none";
+            }
+        }
+
+        public void HandleMouseRequest(MouseEventArgs e)
+        {
+            theWorld.Tanks.TryGetValue(ID, out Tank t);
+            if (e.Button == MouseButtons.Left)
+                fire = "main";
+            else if (e.Button == MouseButtons.Right && t.hasPowerup())
+                fire = "alt";
+            else
+                fire = "none";
+        }
+
+        public void HandleMouseCancel(MouseEventArgs e)
+        {
+            //throw new NotImplementedException();
+        }
+
+
+        public void MessageEntered(string message)
+        {
+            Networking.Send(theServer.TheSocket, message + "\n");
+        }
+
+        public int getID()
+        {
+            return ID;
+        }
+
+        public void sendMessage()
+        {
+            MessageEntered("{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + x + ",\"y\":" + y + "}}");
         }
     }
 }

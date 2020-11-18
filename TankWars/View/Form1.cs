@@ -44,8 +44,9 @@ namespace View {
             FormClosed += OnExit;
 
             this.KeyDown += HandleKeyDown;
-
-
+            this.KeyUp += HandleKeyUp;
+            panel.MouseDown += HandleMouseDown;
+            panel.MouseUp += HandleMouseUp;
         }
 
         private void ErrorEvent(string message)
@@ -59,6 +60,7 @@ namespace View {
             {
                 foreach (object p in newInput)
                 {
+                    //had it working on the provided TankWars Client with false. need to ask about this 
                     MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
                     Invoke(mi);
                 }
@@ -107,7 +109,7 @@ namespace View {
 
         private void HandleKeyDown(object sender, KeyEventArgs e)
         {
-            Debug.WriteLine("button clicked");
+            //Debug.WriteLine("button clicked");
             controller.HandleMoveRequest(e);
 
             e.Handled = true;
@@ -115,19 +117,22 @@ namespace View {
 
         private void HandleKeyUp(object sender, KeyEventArgs e)
         {
-            // e.SuppressKeyPress = true;
+            controller.HandleMoveCancel(e);
             e.Handled = true;
         }
 
 
         private void HandleMouseDown(object sender, MouseEventArgs e)
         {
-
+            Debug.WriteLine("mouse clicked");
+            controller.HandleMouseRequest(e);
+           
         }
 
         private void HandleMouseUp(object sender, MouseEventArgs e)
         {
-
+            Debug.WriteLine("mouse clicked");
+            controller.HandleMouseCancel(e);
         }
     }
 }

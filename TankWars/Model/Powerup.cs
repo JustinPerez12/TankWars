@@ -5,8 +5,6 @@ using System.Text;
 using TankWars;
 
 namespace Model {
-
-
     [JsonObject(MemberSerialization.OptIn)]
     public class Powerup {
 

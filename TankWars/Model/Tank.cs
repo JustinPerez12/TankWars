@@ -102,5 +102,11 @@ namespace Model
         {
             orientation = o;
         }
+
+        public bool hasPowerup()
+        {
+            //need to implement. this is how we will tell if a tank has picked up a powerup. dont know how to do this yet tho lol.
+            return true;
+        }
     }
 }
