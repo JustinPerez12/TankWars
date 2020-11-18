@@ -9,8 +9,10 @@ using System.Windows.Forms;
 using GameController;
 using Model;
 
-namespace View {
-    public class DrawingPanel : Panel {
+namespace View
+{
+    public class DrawingPanel : Panel
+    {
 
         private World theWorld;
         private Controller controller;
@@ -153,6 +155,7 @@ namespace View {
                 e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
             }
 
+            //DrawObjectWithTransform(e, play, theWorld.size, play.GetLocation().GetX(), play.GetLocation().GetY(), play.GetOrientation().ToAngle(), DrawMine); lock (theWorld)
             lock (theWorld)
             {
                 BackgroundDrawer(null, e);
