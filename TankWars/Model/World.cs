@@ -24,5 +24,10 @@ namespace Model {
         {
             return size;
         }
+
+        public void SetWorldSize(int worldSize)
+        {
+            size = worldSize;
+        }
     }
 }

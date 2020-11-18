@@ -33,16 +33,6 @@ namespace Model {
             return location;
         }
 
-        public double GetLocationX()
-        {
-            return location.GetX();
-        }
-
-        public double GetLocationY()
-        {
-            return location.GetY();
-        }
-
     }
 }
 

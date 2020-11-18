@@ -8,9 +8,12 @@ using Newtonsoft.Json;
 using System.Windows.Forms;
 using System.Net.Sockets;
 using System.Diagnostics;
+using TankWars;
 
-namespace GameController {
-    public class Controller {
+namespace GameController
+{
+    public class Controller
+    {
 
         private World theWorld;
         private int worldSize;
@@ -21,7 +24,7 @@ namespace GameController {
         public string x;
         public string y;
 
-        public delegate void InputHandler(IEnumerable<object> text);
+        public delegate void InputHandler();
         public event InputHandler InputArrived;
 
         public delegate void ErrorEvent(string message);
@@ -36,6 +39,8 @@ namespace GameController {
             fire = "none";
             x = "0";
             y = "0";
+            ID = -1;
+            worldSize = 0;
         }
 
         public World getWorld()
@@ -66,6 +71,7 @@ namespace GameController {
             // Start an event loop to receive messages from the server
             state.OnNetworkAction = ReceiveMessage;
 
+            InputArrived();
             Networking.GetData(state);
         }
 
@@ -82,15 +88,13 @@ namespace GameController {
                 return;
             }
             ProcessMessages(state);
-
+            sendMessage();
+            InputArrived();
             // Continue the event loop
             // state.OnNetworkAction has not been changed, 
             // so this same method (ReceiveMessage) 
             // will be invoked when more data arrives
             Networking.GetData(state);
-
-            //not sure if this is where this goes but it was working on the provided TankWars Client
-            sendMessage();
         }
 
         /// <summary>
@@ -100,16 +104,14 @@ namespace GameController {
         /// <param name="state"></param>
         private void ProcessMessages(SocketState state)
         {
-            List<object> items = new List<object>();
-
             string totalData = state.GetData();
             string[] parts = Regex.Split(totalData, @"(?<=[\n])");
 
             // Loop until we have processed all messages.
             // We may have received more than one.
-
             foreach (string p in parts)
             {
+
                 // Ignore empty strings added by the regex splitter
                 if (p.Length == 0)
                     continue;
@@ -126,70 +128,100 @@ namespace GameController {
                 // Then remove it from the SocketState's growable buffer
                 state.RemoveData(0, p.Length);
 
-                try
+                //checks JSONstring and determines if its a tank, wall, proj, or powerup
+                UpdateArrived(p);
+            }
+            //display the new inputs
+            InputArrived();
+        }
+
+        private void UpdateArrived(string JSONString)
+        {
+            try
+            {
+                JObject obj = JObject.Parse(JSONString);
+                JToken tankValue = obj["tank"];
+                JToken wallValue = obj["wall"];
+                JToken projValue = obj["proj"];
+                JToken powerupValue = obj["power"];
+                lock (theWorld)
                 {
-
-                    JObject obj = JObject.Parse(p);
-                    JToken tankValue = obj["tank"];
-                    JToken wallValue = obj["wall"];
-                    JToken projValue = obj["proj"];
-                    JToken powerupValue = obj["power"];
-                    lock (theWorld)
+                    if (tankValue != null)
                     {
-                        if (tankValue != null)
-                        {
-                            Tank tank = null;
-                            tank = JsonConvert.DeserializeObject<Tank>(p);
-                            if (theWorld.Tanks.ContainsKey(tank.GetID()))
-                            {
-                                theWorld.Tanks.Remove(tank.GetID());
-                                theWorld.Tanks.Add(tank.GetID(), tank);
-                                items.Add(tank);
-                                continue;
-                            }
-                            theWorld.Tanks.Add(tank.GetID(), tank);
-                            items.Add(tank);
-                        }
-                        else if (wallValue != null)
-                        {
-                            Wall wall = null;
-                            wall = JsonConvert.DeserializeObject<Wall>(p);
-                            if (theWorld.Walls.ContainsKey(wall.getWallNum()))
-                                continue;
-                            theWorld.Walls.Add(wall.getWallNum(), wall);
-                            items.Add(wall);
-                        }
-                        else if (projValue != null)
-                        {
-                            Projectile proj = null;
-                            proj = JsonConvert.DeserializeObject<Projectile>(p);
-                            if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
-                                continue;
-                            theWorld.Projectiles.Add(proj.getProjnum(), proj);
-                            items.Add(proj);
-                        }
+                        Tank tank = null;
+                        tank = JsonConvert.DeserializeObject<Tank>(JSONString);
+                        AddTank(tank);
+                    }
+                    else if (wallValue != null)
+                    {
+                        Wall wall = null;
+                        wall = JsonConvert.DeserializeObject<Wall>(JSONString);
+                        AddWall(wall);
+                    }
+                    else if (projValue != null)
+                    {
+                        Projectile proj = null;
+                        proj = JsonConvert.DeserializeObject<Projectile>(JSONString);
+                        AddProj(proj);
+                    }
 
-                        else if (powerupValue != null)
-                        {
-                            Powerup power = null;
-                            power = JsonConvert.DeserializeObject<Powerup>(p);
-                            if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
-                                continue;
-                            theWorld.Powerups.Add(power.getPowerNum(), power);
-                            items.Add(power);
-                        }
+                    else if (powerupValue != null)
+                    {
+                        Powerup power = null;
+                        power = JsonConvert.DeserializeObject<Powerup>(JSONString);
+                        AddPower(power);
                     }
                 }
-                catch (Exception)
+            }
+            catch (Exception)
+            {
+                //first time around. Dont want to set ID and worldSize again if another exception is caught 
+                if (ID == -1)
                 {
-                    ID = int.Parse(parts[0]);
-                    worldSize = int.Parse(parts[1]);
+                    ID = int.Parse(JSONString);
+                    worldSize = -1;
+                }
+
+                else if (worldSize == -1)
+                {
+                    worldSize = int.Parse(JSONString);
+                    theWorld.SetWorldSize(worldSize);
                 }
             }
-            InputArrived(items);
-            //sendMessage();
-
         }
+
+        private void AddPower(Powerup power)
+        {
+            if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
+                return;
+            theWorld.Powerups.Add(power.getPowerNum(), power);
+        }
+
+        private void AddProj(Projectile proj)
+        {
+            if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
+                return;
+            theWorld.Projectiles.Add(proj.getProjnum(), proj);
+        }
+
+        private void AddWall(Wall wall)
+        {
+            if (theWorld.Walls.ContainsKey(wall.getWallNum()))
+                return;
+            theWorld.Walls.Add(wall.getWallNum(), wall);
+        }
+
+        private void AddTank(Tank tank)
+        {
+            if (theWorld.Tanks.ContainsKey(tank.GetID()))
+            {
+                theWorld.Tanks.Remove(tank.GetID());
+                theWorld.Tanks.Add(tank.GetID(), tank);
+                return;
+            }
+            theWorld.Tanks.Add(tank.GetID(), tank);
+        }
+
 
 
         /// <summary>
@@ -227,7 +259,7 @@ namespace GameController {
             }
             else if (e.KeyCode == Keys.D)
             {
-               // Debug.WriteLine("moving right");
+                // Debug.WriteLine("moving right");
                 moving = "right";
             }
         }
@@ -260,22 +292,47 @@ namespace GameController {
         {
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.Button == MouseButtons.Left)
+            {
                 fire = "main";
+            }
             else if (e.Button == MouseButtons.Right && t.hasPowerup())
+            {
                 fire = "alt";
+            }
             else
+            {
                 fire = "none";
+            }
         }
 
         public void HandleMouseCancel(MouseEventArgs e)
         {
-            //throw new NotImplementedException();
+            fire = "none";
+        }
+
+
+        public void HandleMouseMove(MouseEventArgs e)
+        {
+            if (theWorld.Tanks.TryGetValue(ID, out Tank t))
+            {
+                t.SetTurretOrientation(e.X, e.Y);
+                int x1 = e.X;
+                int y1 = e.Y;
+                x1 -= 400;
+                y1 -= 400;
+
+                Vector2D vector = new Vector2D(x1, y1);
+                vector.Normalize();
+                x = vector.GetX().ToString();
+                y = vector.GetY().ToString();
+            }
         }
 
 
         public void MessageEntered(string message)
         {
             Networking.Send(theServer.TheSocket, message + "\n");
+            // Debug.WriteLine(message);
         }
 
         public int getID()

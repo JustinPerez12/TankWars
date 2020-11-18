@@ -13,15 +13,17 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace View {
-    public partial class Form1 : Form {
+namespace View
+{
+    public partial class Form1 : Form
+    {
 
         Controller controller;
         DrawingPanel panel;
         World theWorld;
 
         private const int viewSize = 800;
-        private const int menuSize = 40;    
+        private const int menuSize = 40;
         public Form1()
         {
             InitializeComponent();
@@ -47,23 +49,26 @@ namespace View {
             this.KeyUp += HandleKeyUp;
             panel.MouseDown += HandleMouseDown;
             panel.MouseUp += HandleMouseUp;
+            panel.MouseMove += HandleMouseMove;
         }
+
 
         private void ErrorEvent(string message)
         {
             MessageBox.Show("Error connecting to server. Please restart the client.");
         }
 
-        private void DisplayInput(IEnumerable<object> newInput)
+        private void DisplayInput()
         {
-            lock (theWorld)
+            //had it working on the provided TankWars Client with false. need to ask about this 
+            try
             {
-                foreach (object p in newInput)
-                {
-                    //had it working on the provided TankWars Client with false. need to ask about this 
-                    MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
-                    Invoke(mi);
-                }
+                MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
+                Invoke(mi);
+            }
+            catch(Exception)
+            {
+
             }
         }
 
@@ -124,15 +129,19 @@ namespace View {
 
         private void HandleMouseDown(object sender, MouseEventArgs e)
         {
-            Debug.WriteLine("mouse clicked");
             controller.HandleMouseRequest(e);
-           
+
         }
 
         private void HandleMouseUp(object sender, MouseEventArgs e)
         {
-            Debug.WriteLine("mouse clicked");
             controller.HandleMouseCancel(e);
+        }
+
+
+        private void HandleMouseMove(object sender, MouseEventArgs e)
+        {
+            controller.HandleMouseMove(e);
         }
     }
 }

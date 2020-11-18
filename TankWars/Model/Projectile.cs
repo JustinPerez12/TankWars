@@ -45,16 +45,6 @@ namespace Model {
         {
             return location;
         }
-
-        public double GetLocationX()
-        {
-            return location.GetX();
-        }
-
-        public double GetLocationY()
-        {
-            return location.GetY();
-        }
         public Vector2D GetDirection()
         {
             return direction;
@@ -67,6 +57,11 @@ namespace Model {
         public void SetLocation(Vector2D l)
         {
             location = l;
+        }
+
+        public int GetOwner()
+        {
+            return tankID;
         }
     }
 }
