@@ -96,9 +96,6 @@ namespace GameController
             // will be invoked when more data arrives
             Networking.GetData(state);
 
-            //not sure if this is where this goes but it was working on the provided TankWars Client
-            sendMessage();
-
         }
 
         /// <summary>
