@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using GameController;
@@ -80,7 +81,7 @@ namespace View
 
             lock (theWorld)
             {
-                
+
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
@@ -100,8 +101,8 @@ namespace View
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
-                    if(!tank.Disconnected() || !tank.IsDead())
-                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+                    Debug.WriteLine(theWorld.Tanks.Count + "");
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
 
                     //normalize the vector then pass into turretdrawer
                     tank.TurretOrientation().Normalize();
@@ -143,7 +144,6 @@ namespace View
                     else
                         y += 50;
                 }
-
                 else
                 {
                     DrawObjectWithTransform(e, wall, theWorld.size, x, wall.getP2().GetY(), 0, WallDrawer);
@@ -154,7 +154,6 @@ namespace View
                 }
             }
         }
-
 
         /// <summary>
         /// Acts as a drawing delegate for DrawObjectWithTransform

@@ -33,6 +33,11 @@ namespace Model {
             return location;
         }
 
+        public bool isDead()
+        {
+            return died;
+        }
+
     }
 }
 

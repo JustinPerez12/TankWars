@@ -110,22 +110,22 @@ namespace GameController
         /// <param name="state"></param>
         private void ProcessMessages(SocketState state)
         {
-            lock(theServer)
+            lock (theServer)
             {
                 string totalData = state.GetData();
                 string[] parts = Regex.Split(totalData, @"(?<=[\n])");
 
-            // Loop until we have processed all messages.
-            // We may have received more than one.
-            foreach (string p in parts)
-            {
-                // Ignore empty strings added by the regex splitter
-                if (p.Length == 0)
-                    continue;
-                // The regex splitter will include the last string even if it doesn't end with a '\n',
-                // So we need to ignore it if this happens. 
-                if (p[p.Length - 1] != '\n')
-                    break;
+                // Loop until we have processed all messages.
+                // We may have received more than one.
+                foreach (string p in parts)
+                {
+                    // Ignore empty strings added by the regex splitter
+                    if (p.Length == 0)
+                        continue;
+                    // The regex splitter will include the last string even if it doesn't end with a '\n',
+                    // So we need to ignore it if this happens. 
+                    if (p[p.Length - 1] != '\n')
+                        break;
 
                     // Display the message
                     // "messages" is the big message text box in the form.
@@ -150,6 +150,7 @@ namespace GameController
         /// <param name="e"></param>
         public void HandleMoveRequest(KeyEventArgs e)
         {
+            Debug.WriteLine("inpuit");
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.KeyCode == Keys.W)
             {
@@ -285,7 +286,6 @@ namespace GameController
             return false;
         }
 
-
         /// <summary>
         /// private helper method to determine if a JSONstring is a tank, wall, projectile, or powerup
         /// </summary>
@@ -353,7 +353,11 @@ namespace GameController
         {
             if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
                 return;
-            theWorld.Powerups.Add(power.getPowerNum(), power);
+
+            else if (power.isDead())
+                theWorld.Powerups.Remove(power.getPowerNum());
+            else
+                theWorld.Powerups.Add(power.getPowerNum(), power);
         }
 
         /// <summary>
@@ -364,7 +368,11 @@ namespace GameController
         {
             if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
                 return;
-            theWorld.Projectiles.Add(proj.getProjnum(), proj);
+
+            else if (proj.isDead())
+                theWorld.Projectiles.Remove(proj.getProjnum());
+            else
+                theWorld.Projectiles.Add(proj.getProjnum(), proj);
         }
 
         /// <summary>
@@ -385,12 +393,13 @@ namespace GameController
         private void AddTank(Tank tank)
         {
             if (theWorld.Tanks.ContainsKey(tank.GetID()))
-            {
-                theWorld.Tanks.Remove(tank.GetID());
-                theWorld.Tanks.Add(tank.GetID(), tank);
                 return;
-            }
-            theWorld.Tanks.Add(tank.GetID(), tank);
+
+            else if (tank.Disconnected())
+                theWorld.Tanks.Remove(tank.GetID());
+
+            else
+                theWorld.Tanks.Add(tank.GetID(), tank);
         }
 
 
