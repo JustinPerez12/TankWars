@@ -115,6 +115,7 @@ namespace View
             controller.HandleMoveRequest(e);
             e.SuppressKeyPress = true;
             e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
         private void HandleKeyUp(object sender, KeyEventArgs e)
@@ -122,12 +123,12 @@ namespace View
             controller.HandleMoveCancel(e);
             e.SuppressKeyPress = true;
             e.Handled = true;
+            e.SuppressKeyPress = true;
         }
 
         private void HandleMouseDown(object sender, MouseEventArgs e)
         {
             controller.HandleMouseRequest(e);
-
         }
 
         private void HandleMouseUp(object sender, MouseEventArgs e)
