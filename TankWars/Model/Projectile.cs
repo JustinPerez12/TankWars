@@ -35,7 +35,7 @@ namespace Model {
 
         public void Deactivate()
         {
-            died = false;
+            died = true;
         }
         public bool GetActive()
         {
@@ -48,6 +48,11 @@ namespace Model {
         public Vector2D GetDirection()
         {
             return direction;
+        }
+
+        public bool isDead()
+        {
+            return died;
         }
 
         public double GetDirectionAngle()

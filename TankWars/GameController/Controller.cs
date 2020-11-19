@@ -110,22 +110,22 @@ namespace GameController
         /// <param name="state"></param>
         private void ProcessMessages(SocketState state)
         {
-            lock(theServer)
+            lock (theServer)
             {
                 string totalData = state.GetData();
                 string[] parts = Regex.Split(totalData, @"(?<=[\n])");
 
-            // Loop until we have processed all messages.
-            // We may have received more than one.
-            foreach (string p in parts)
-            {
-                // Ignore empty strings added by the regex splitter
-                if (p.Length == 0)
-                    continue;
-                // The regex splitter will include the last string even if it doesn't end with a '\n',
-                // So we need to ignore it if this happens. 
-                if (p[p.Length - 1] != '\n')
-                    break;
+                // Loop until we have processed all messages.
+                // We may have received more than one.
+                foreach (string p in parts)
+                {
+                    // Ignore empty strings added by the regex splitter
+                    if (p.Length == 0)
+                        continue;
+                    // The regex splitter will include the last string even if it doesn't end with a '\n',
+                    // So we need to ignore it if this happens. 
+                    if (p[p.Length - 1] != '\n')
+                        break;
 
                     // Display the message
                     // "messages" is the big message text box in the form.
@@ -150,6 +150,7 @@ namespace GameController
         /// <param name="e"></param>
         public void HandleMoveRequest(KeyEventArgs e)
         {
+            //Debug.WriteLine("inpuit");
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.KeyCode == Keys.W)
             {
@@ -285,7 +286,6 @@ namespace GameController
             return false;
         }
 
-
         /// <summary>
         /// private helper method to determine if a JSONstring is a tank, wall, projectile, or powerup
         /// </summary>
@@ -303,27 +303,23 @@ namespace GameController
                 {
                     if (tankValue != null)
                     {
-                        Tank tank = null;
-                        tank = JsonConvert.DeserializeObject<Tank>(JSONString);
+                        Tank tank = JsonConvert.DeserializeObject<Tank>(JSONString);
                         AddTank(tank);
                     }
                     else if (wallValue != null)
                     {
-                        Wall wall = null;
-                        wall = JsonConvert.DeserializeObject<Wall>(JSONString);
+                        Wall wall = JsonConvert.DeserializeObject<Wall>(JSONString);
                         AddWall(wall);
                     }
                     else if (projValue != null)
                     {
-                        Projectile proj = null;
-                        proj = JsonConvert.DeserializeObject<Projectile>(JSONString);
+                        Projectile proj = JsonConvert.DeserializeObject<Projectile>(JSONString);
                         AddProj(proj);
                     }
 
                     else if (powerupValue != null)
                     {
-                        Powerup power = null;
-                        power = JsonConvert.DeserializeObject<Powerup>(JSONString);
+                        Powerup power = JsonConvert.DeserializeObject<Powerup>(JSONString);
                         AddPower(power);
                     }
                 }
@@ -353,7 +349,11 @@ namespace GameController
         {
             if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
                 return;
-            theWorld.Powerups.Add(power.getPowerNum(), power);
+
+            else if (power.isDead())
+                theWorld.Powerups.Remove(power.getPowerNum());
+            else
+                theWorld.Powerups.Add(power.getPowerNum(), power);
         }
 
         /// <summary>
@@ -363,8 +363,16 @@ namespace GameController
         private void AddProj(Projectile proj)
         {
             if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
+            {
+                theWorld.Projectiles.Remove(proj.getProjnum());
+                theWorld.Projectiles.Add(proj.getProjnum(), proj);
                 return;
-            theWorld.Projectiles.Add(proj.getProjnum(), proj);
+            }
+
+            else if (proj.isDead())
+                theWorld.Projectiles.Remove(proj.getProjnum());
+            else
+                theWorld.Projectiles.Add(proj.getProjnum(), proj);
         }
 
         /// <summary>
@@ -382,15 +390,20 @@ namespace GameController
         /// private helper method to add to the tank dictionary in theWorld
         /// </summary>
         /// <param name="tank"></param>
-        private void AddTank(Tank tank)
+        public void AddTank(Tank tank)
         {
-            if (theWorld.Tanks.ContainsKey(tank.GetID()))
+            if (tank.Disconnected() || tank.IsDead())
+                theWorld.Tanks.Remove(tank.GetID());
+
+            else if (theWorld.Tanks.ContainsKey(tank.GetID()) && !tank.IsDead())
             {
                 theWorld.Tanks.Remove(tank.GetID());
                 theWorld.Tanks.Add(tank.GetID(), tank);
                 return;
             }
-            theWorld.Tanks.Add(tank.GetID(), tank);
+
+            else
+                theWorld.Tanks.Add(tank.GetID(), tank);
         }
 
 

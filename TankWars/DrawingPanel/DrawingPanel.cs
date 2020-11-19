@@ -94,7 +94,7 @@ namespace View
 
             lock (theWorld)
             {
-                
+
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
@@ -111,11 +111,14 @@ namespace View
                 }
 
                 BackgroundDrawer(null, e);
+
+
+                foreach (Projectile proj in theWorld.Projectiles.Values)
+                    DrawObjectWithTransform(e, proj, worldSize, proj.GetLocation().GetX(), proj.GetLocation().GetY(), proj.GetDirectionAngle(), ProjectileDrawer);
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
-                    if(!tank.Disconnected() || !tank.IsDead())
-                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
 
                     //normalize the vector then pass into turretdrawer
                     tank.TurretOrientation().Normalize();
@@ -126,8 +129,6 @@ namespace View
                 foreach (Powerup pow in theWorld.Powerups.Values)
                     DrawObjectWithTransform(e, pow, worldSize, pow.getLocation().GetX(), pow.getLocation().GetY(), 0, PowerupDrawer);
 
-                foreach (Projectile proj in theWorld.Projectiles.Values)
-                    DrawObjectWithTransform(e, proj, worldSize, proj.GetLocation().GetX(), proj.GetLocation().GetY(), proj.GetDirectionAngle(), ProjectileDrawer);
 
                 foreach (Wall wall in theWorld.Walls.Values)
                     DrawWall(wall, e);
@@ -157,7 +158,6 @@ namespace View
                     else
                         y += 50;
                 }
-
                 else
                 {
                     DrawObjectWithTransform(e, wall, theWorld.size, x, wall.getP2().GetY(), 0, WallDrawer);
@@ -168,7 +168,6 @@ namespace View
                 }
             }
         }
-
 
         /// <summary>
         /// Acts as a drawing delegate for DrawObjectWithTransform
@@ -233,16 +232,29 @@ namespace View
         /// <param name="e"></param>
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
-            Projectile p = o as Projectile;
+/*            Projectile p = o as Projectile;
             int ID = p.GetOwner();
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             if (theWorld.Tanks.TryGetValue(ID, out Tank player))
             {
                 string color = player.Color();
                 Image i = Image.FromFile("..\\..\\..\\Resources\\images\\shot-" + color + ".png");
-                int width = i.Width;
-                int height = i.Height;
 
-                e.Graphics.DrawImage(i, 0, 0);
+                e.Graphics.DrawImage(i, i.Width/2, i.Height/2);
+            }*/
+
+            int width = 8;
+            int height = 8;
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            using (System.Drawing.SolidBrush redBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Red))
+            using (System.Drawing.SolidBrush yellowBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Yellow))
+            using (System.Drawing.SolidBrush blackBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black))
+            {
+                // Circles are drawn starting from the top-left corner.
+                // So if we want the circle centered on the powerup's location, we have to offset it
+                // by half its size to the left (-width/2) and up (-height/2)
+                Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
+                e.Graphics.FillEllipse(yellowBrush, r);
             }
         }
 
