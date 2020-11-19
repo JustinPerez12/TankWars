@@ -49,9 +49,9 @@ namespace Model
 
         private string RandomColor()
         {
-            List<string> colors = new List<string>() { "blue", "brown", "green", "grey", "red", "violet", "white", "yellow" };
+            List<string> colors = new List<string>() { "Blue", "Green", "Red", "Purple", "Dark", "Yellow", "Orange" };
             Random random = new Random();
-            int i = random.Next(0, 8);
+            int i = random.Next(0, 6);
 
             return colors[i];
         }

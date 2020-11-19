@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Windows.Forms;
 using GameController;
 using Model;
@@ -16,6 +15,9 @@ namespace View
         private int viewSize = 800;
         private int worldSize = 2000;
         private Image backgroundImage;
+        private Image wallImage;
+        Dictionary<string, Image> images;
+
 
         public DrawingPanel(World w, Controller controller1)
         {
@@ -23,12 +25,14 @@ namespace View
             DoubleBuffered = true;
             theWorld = w;
             backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
-            Dictionary<string, Image> images = new Dictionary<string, Image>();
-            var files = new DirectoryInfo(@"C:\Source\");
-            foreach (var file in files.GetFiles())
+            wallImage = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
+            string filePath = "..\\..\\..\\Resources\\images\\";
+            List<string> colors = new List<string>() { "Blue", "Green","Red", "Purple", "Dark", "Yellow","Orange"};
+            images = new Dictionary<string, Image>();
+            foreach(string color in colors)
             {
-                //Debug.writeLine(file.Directory);
-                
+                images.Add(color, Image.FromFile(filePath + color + "Tank.png"));
+                images.Add(color + "Turret", Image.FromFile(filePath + color + "Turret.png"));
             }
         }
 
@@ -176,8 +180,8 @@ namespace View
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank tank = o as Tank;
-            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\RedTank.png");
-            e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
+            images.TryGetValue(tank.Color(), out Image image);
+            e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
         }
 
         /// <summary>
@@ -190,7 +194,7 @@ namespace View
         private void WallDrawer(object o, PaintEventArgs e)
         {
             Wall wall = o as Wall;
-            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
+            Image i = wallImage;
             e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
         }
 
