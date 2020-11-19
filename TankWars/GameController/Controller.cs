@@ -87,8 +87,8 @@ namespace GameController
                 error(state.ErrorMessage);
                 return;
             }
-            ProcessMessages(state);
             sendMessage();
+            ProcessMessages(state);
             InputArrived();
             // Continue the event loop
             // state.OnNetworkAction has not been changed, 
@@ -105,35 +105,37 @@ namespace GameController
         /// <param name="state"></param>
         private void ProcessMessages(SocketState state)
         {
-            string totalData = state.GetData();
-            string[] parts = Regex.Split(totalData, @"(?<=[\n])");
-
-            // Loop until we have processed all messages.
-            // We may have received more than one.
-            foreach (string p in parts)
+            lock(theServer)
             {
+                string totalData = state.GetData();
+                string[] parts = Regex.Split(totalData, @"(?<=[\n])");
 
-                // Ignore empty strings added by the regex splitter
-                if (p.Length == 0)
-                    continue;
-                // The regex splitter will include the last string even if it doesn't end with a '\n',
-                // So we need to ignore it if this happens. 
-                if (p[p.Length - 1] != '\n')
-                    break;
+                // Loop until we have processed all messages.
+                // We may have received more than one.
+                foreach (string p in parts)
+                {
+                    // Ignore empty strings added by the regex splitter
+                    if (p.Length == 0)
+                        continue;
+                    // The regex splitter will include the last string even if it doesn't end with a '\n',
+                    // So we need to ignore it if this happens. 
+                    if (p[p.Length - 1] != '\n')
+                        break;
 
-                // Display the message
-                // "messages" is the big message text box in the form.
-                // We must use a MethodInvoker, because only the thread 
-                // that created the GUI can modify it.
+                    // Display the message
+                    // "messages" is the big message text box in the form.
+                    // We must use a MethodInvoker, because only the thread 
+                    // that created the GUI can modify it.
 
-                // Then remove it from the SocketState's growable buffer
-                state.RemoveData(0, p.Length);
+                    // Then remove it from the SocketState's growable buffer
+                    state.RemoveData(0, p.Length);
 
-                //checks JSONstring and determines if its a tank, wall, proj, or powerup
-                UpdateArrived(p);
+                    //checks JSONstring and determines if its a tank, wall, proj, or powerup
+                    UpdateArrived(p);
+                }
+                //display the new inputs
+                InputArrived();
             }
-            //display the new inputs
-            InputArrived();
         }
 
         private void UpdateArrived(string JSONString)

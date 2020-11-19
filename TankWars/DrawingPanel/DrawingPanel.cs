@@ -11,10 +11,8 @@ using GameController;
 using Model;
 using TankWars;
 
-namespace View
-{
-    public class DrawingPanel : Panel
-    {
+namespace View {
+    public class DrawingPanel : Panel {
 
         private World theWorld;
         private Controller controller;
@@ -158,23 +156,23 @@ namespace View
         // This method is invoked when the DrawingPanel needs to be re-drawn
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
-            {
-                double playerY = player.GetLocation().GetY();
-                double playerX = player.GetLocation().GetX();
-
-                //double ratio = (double)viewSize / (double)theWorld.getSize();
-                double ratio = (double)viewSize / (double)2000;
-                int halfSizeScaled = (int)(worldSize / 2.0 * ratio);
-
-                double inverseTranslateX = -WorldSpaceToImageSpace(worldSize, playerX) + halfSizeScaled;
-                double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, playerY) + halfSizeScaled;
-
-                e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
-            }
-
             lock (theWorld)
             {
+                if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
+                {
+                    double playerY = player.GetLocation().GetY();
+                    double playerX = player.GetLocation().GetX();
+
+                    //double ratio = (double)viewSize / (double)theWorld.getSize();
+                    double ratio = (double)viewSize / (double)2000;
+                    int halfSizeScaled = (int)(worldSize / 2.0 * ratio);
+
+                    double inverseTranslateX = -WorldSpaceToImageSpace(worldSize, playerX) + halfSizeScaled;
+                    double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, playerY) + halfSizeScaled;
+
+                    e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
+                }
+
                 BackgroundDrawer(null, e);
 
                 // Draw the players
