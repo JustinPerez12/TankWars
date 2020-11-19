@@ -1,8 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Text;
 using TankWars;
 
 namespace Model
@@ -53,7 +51,7 @@ namespace Model
         {
             List<string> colors = new List<string>() { "blue", "brown", "green", "grey", "red", "violet", "white", "yellow" };
             Random random = new Random();
-            int i = random.Next(0,8);
+            int i = random.Next(0, 8);
 
             return colors[i];
         }
@@ -121,3 +119,4 @@ namespace Model
         }
     }
 }
+

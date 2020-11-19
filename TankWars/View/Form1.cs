@@ -60,16 +60,13 @@ namespace View
 
         private void DisplayInput()
         {
-            //had it working on the provided TankWars Client with false. need to ask about this 
             try
             {
                 MethodInvoker mi = new MethodInvoker(() => this.Invalidate(true));
                 Invoke(mi);
             }
-            catch(Exception)
-            {
-
-            }
+            catch (Exception)
+            { }
         }
 
 
@@ -116,16 +113,16 @@ namespace View
         {
             //Debug.WriteLine("button clicked");
             controller.HandleMoveRequest(e);
-
+            e.SuppressKeyPress = true;
             e.Handled = true;
         }
 
         private void HandleKeyUp(object sender, KeyEventArgs e)
         {
             controller.HandleMoveCancel(e);
+            e.SuppressKeyPress = true;
             e.Handled = true;
         }
-
 
         private void HandleMouseDown(object sender, MouseEventArgs e)
         {
@@ -137,7 +134,6 @@ namespace View
         {
             controller.HandleMouseCancel(e);
         }
-
 
         private void HandleMouseMove(object sender, MouseEventArgs e)
         {

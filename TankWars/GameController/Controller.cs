@@ -14,7 +14,6 @@ namespace GameController
 {
     public class Controller
     {
-
         private World theWorld;
         private int worldSize;
         private int ID;
@@ -43,16 +42,23 @@ namespace GameController
             worldSize = 0;
         }
 
+        /// <summary>
+        /// returns the world
+        /// </summary>
+        /// <returns></returns>
         public World getWorld()
         {
             return theWorld;
         }
 
+        /// <summary>
+        /// wrapper for the networking.connecttoserver
+        /// </summary>
+        /// <param name="address"></param>
         public void Connect(string address)
         {
             Networking.ConnectToServer(OnConnect, address, 11000);
         }
-
 
         /// <summary>
         /// Method to be invoked by the networking library when a connection is made
@@ -95,7 +101,6 @@ namespace GameController
             // so this same method (ReceiveMessage) 
             // will be invoked when more data arrives
             Networking.GetData(state);
-
         }
 
         /// <summary>
@@ -112,7 +117,6 @@ namespace GameController
             // We may have received more than one.
             foreach (string p in parts)
             {
-
                 // Ignore empty strings added by the regex splitter
                 if (p.Length == 0)
                     continue;
@@ -136,6 +140,153 @@ namespace GameController
             InputArrived();
         }
 
+
+        /// <summary>
+        /// when a move button is clicked
+        /// </summary>
+        /// <param name="e"></param>
+        public void HandleMoveRequest(KeyEventArgs e)
+        {
+            theWorld.Tanks.TryGetValue(ID, out Tank t);
+            if (e.KeyCode == Keys.W)
+            {
+                moving = "up";
+            }
+            else if (e.KeyCode == Keys.A)
+            {
+                moving = "left";
+            }
+            else if (e.KeyCode == Keys.S)
+            {
+                moving = "down";
+            }
+            else if (e.KeyCode == Keys.D)
+            {
+                moving = "right";
+            }
+        }
+
+        /// <summary>
+        /// when a move button is released
+        /// </summary>
+        /// <param name="e"></param>
+        public void HandleMoveCancel(KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.W)
+            {
+                moving = "none";
+            }
+            else if (e.KeyCode == Keys.A)
+            {
+                moving = "none";
+            }
+            else if (e.KeyCode == Keys.S)
+            {
+                moving = "none";
+            }
+            else if (e.KeyCode == Keys.D)
+            {
+                moving = "none";
+            }
+        }
+
+        /// <summary>
+        /// when a mouse button is clicked
+        /// </summary>
+        /// <param name="e"></param>
+        public void HandleMouseRequest(MouseEventArgs e)
+        {
+            theWorld.Tanks.TryGetValue(ID, out Tank t);
+            if (e.Button == MouseButtons.Left)
+            {
+                fire = "main";
+            }
+            else if (e.Button == MouseButtons.Right && t.hasPowerup())
+            {
+                fire = "alt";
+            }
+            else
+            {
+                fire = "none";
+            }
+        }
+
+        /// <summary>
+        /// when a mouse button is released
+        /// </summary>
+        /// <param name="e"></param>
+        public void HandleMouseCancel(MouseEventArgs e)
+        {
+            fire = "none";
+        }
+
+        /// <summary>
+        /// when the mouse in on the panel and it moves
+        /// </summary>
+        /// <param name="e"></param>
+        public void HandleMouseMove(MouseEventArgs e)
+        {
+            if (theWorld.Tanks.TryGetValue(ID, out Tank t))
+            {
+                t.SetTurretOrientation(e.X, e.Y);
+                int x1 = e.X;
+                int y1 = e.Y;
+                x1 -= 400;
+                y1 -= 400;
+
+                Vector2D vector = new Vector2D(x1, y1);
+                vector.Normalize();
+                x = vector.GetX().ToString();
+                y = vector.GetY().ToString();
+            }
+        }
+
+        /// <summary>
+        /// wrapper class for networking.send
+        /// </summary>
+        /// <param name="message"></param>
+        public void MessageEntered(string message)
+        {
+            Networking.Send(theServer.TheSocket, message + "\n");
+        }
+
+        /// <summary>
+        /// wrapper for our wrapper that has the command ready to go
+        /// </summary>
+        public void sendMessage()
+        {
+            MessageEntered("{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + x + ",\"y\":" + y + "}}");
+        }
+
+        /// <summary>
+        /// helper method to get the ID of this client
+        /// </summary>
+        /// <returns></returns>
+        public int getID()
+        {
+            return ID;
+        }
+
+        /// <summary>
+        /// helper method to Handle the form closing by shutting down the socket cleanly
+        /// </summary>
+        /// <returns></returns>
+        public bool Exit()
+        {
+            if (theServer != null)
+            {
+                theServer.TheSocket.Shutdown(SocketShutdown.Both);
+                return true;
+            }
+
+            return false;
+        }
+
+
+        /// <summary>
+        /// private helper method to determine if a JSONstring is a tank, wall, projectile, or powerup
+        /// </summary>
+        /// <param name="JSONString"></param>
         private void UpdateArrived(string JSONString)
         {
             try
@@ -191,6 +342,10 @@ namespace GameController
             }
         }
 
+        /// <summary>
+        /// private helper method to add to the powerup dictionary in theWorld
+        /// </summary>
+        /// <param name="power"></param>
         private void AddPower(Powerup power)
         {
             if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
@@ -198,6 +353,10 @@ namespace GameController
             theWorld.Powerups.Add(power.getPowerNum(), power);
         }
 
+        /// <summary>
+        /// private helper method to add to the projectile dictionary in theWorld
+        /// </summary>
+        /// <param name="proj"></param>
         private void AddProj(Projectile proj)
         {
             if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
@@ -205,6 +364,10 @@ namespace GameController
             theWorld.Projectiles.Add(proj.getProjnum(), proj);
         }
 
+        /// <summary>
+        /// private helper method to add to the wall dictionary in theWorld
+        /// </summary>
+        /// <param name="wall"></param>
         private void AddWall(Wall wall)
         {
             if (theWorld.Walls.ContainsKey(wall.getWallNum()))
@@ -212,6 +375,10 @@ namespace GameController
             theWorld.Walls.Add(wall.getWallNum(), wall);
         }
 
+        /// <summary>
+        /// private helper method to add to the tank dictionary in theWorld
+        /// </summary>
+        /// <param name="tank"></param>
         private void AddTank(Tank tank)
         {
             if (theWorld.Tanks.ContainsKey(tank.GetID()))
@@ -224,126 +391,5 @@ namespace GameController
         }
 
 
-
-        /// <summary>
-        /// Private helper method to Handle the form closing by shutting down the socket cleanly
-        /// </summary>
-        /// <returns></returns>
-        public bool Exit()
-        {
-            if (theServer != null)
-            {
-                theServer.TheSocket.Shutdown(SocketShutdown.Both);
-                return true;
-            }
-
-            return false;
-        }
-
-        public void HandleMoveRequest(KeyEventArgs e)
-        {
-            theWorld.Tanks.TryGetValue(ID, out Tank t);
-            if (e.KeyCode == Keys.W)
-            {
-                //Debug.WriteLine("moving up");
-                moving = "up";
-            }
-            else if (e.KeyCode == Keys.A)
-            {
-                //Debug.WriteLine("moving left");
-                moving = "left";
-            }
-            else if (e.KeyCode == Keys.S)
-            {
-                //Debug.WriteLine("moving down");
-                moving = "down";
-            }
-            else if (e.KeyCode == Keys.D)
-            {
-                // Debug.WriteLine("moving right");
-                moving = "right";
-            }
-        }
-
-        public void HandleMoveCancel(KeyEventArgs e)
-        {
-            if (e.KeyCode == Keys.W)
-            {
-                //Debug.WriteLine("moving up");
-                moving = "none";
-            }
-            else if (e.KeyCode == Keys.A)
-            {
-                //Debug.WriteLine("moving left");
-                moving = "none";
-            }
-            else if (e.KeyCode == Keys.S)
-            {
-                //Debug.WriteLine("moving down");
-                moving = "none";
-            }
-            else if (e.KeyCode == Keys.D)
-            {
-                //Debug.WriteLine("moving right");
-                moving = "none";
-            }
-        }
-
-        public void HandleMouseRequest(MouseEventArgs e)
-        {
-            theWorld.Tanks.TryGetValue(ID, out Tank t);
-            if (e.Button == MouseButtons.Left)
-            {
-                fire = "main";
-            }
-            else if (e.Button == MouseButtons.Right && t.hasPowerup())
-            {
-                fire = "alt";
-            }
-            else
-            {
-                fire = "none";
-            }
-        }
-
-        public void HandleMouseCancel(MouseEventArgs e)
-        {
-            fire = "none";
-        }
-
-
-        public void HandleMouseMove(MouseEventArgs e)
-        {
-            if (theWorld.Tanks.TryGetValue(ID, out Tank t))
-            {
-                t.SetTurretOrientation(e.X, e.Y);
-                int x1 = e.X;
-                int y1 = e.Y;
-                x1 -= 400;
-                y1 -= 400;
-
-                Vector2D vector = new Vector2D(x1, y1);
-                vector.Normalize();
-                x = vector.GetX().ToString();
-                y = vector.GetY().ToString();
-            }
-        }
-
-
-        public void MessageEntered(string message)
-        {
-            Networking.Send(theServer.TheSocket, message + "\n");
-            // Debug.WriteLine(message);
-        }
-
-        public int getID()
-        {
-            return ID;
-        }
-
-        public void sendMessage()
-        {
-            MessageEntered("{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + x + ",\"y\":" + y + "}}");
-        }
     }
 }
