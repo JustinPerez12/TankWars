@@ -1,5 +1,8 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Windows.Forms;
 using GameController;
 using Model;
@@ -19,7 +22,14 @@ namespace View
             controller = controller1;
             DoubleBuffered = true;
             theWorld = w;
-            backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png"); ;
+            backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
+            Dictionary<string, Image> images = new Dictionary<string, Image>();
+            var files = new DirectoryInfo(@"C:\Source\");
+            foreach (var file in files.GetFiles())
+            {
+                //Debug.writeLine(file.Directory);
+                
+            }
         }
 
         /// <summary>
