@@ -150,7 +150,7 @@ namespace GameController
         /// <param name="e"></param>
         public void HandleMoveRequest(KeyEventArgs e)
         {
-            Debug.WriteLine("inpuit");
+            //Debug.WriteLine("inpuit");
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.KeyCode == Keys.W)
             {
@@ -303,27 +303,23 @@ namespace GameController
                 {
                     if (tankValue != null)
                     {
-                        Tank tank = null;
-                        tank = JsonConvert.DeserializeObject<Tank>(JSONString);
+                        Tank tank = JsonConvert.DeserializeObject<Tank>(JSONString);
                         AddTank(tank);
                     }
                     else if (wallValue != null)
                     {
-                        Wall wall = null;
-                        wall = JsonConvert.DeserializeObject<Wall>(JSONString);
+                        Wall wall = JsonConvert.DeserializeObject<Wall>(JSONString);
                         AddWall(wall);
                     }
                     else if (projValue != null)
                     {
-                        Projectile proj = null;
-                        proj = JsonConvert.DeserializeObject<Projectile>(JSONString);
+                        Projectile proj = JsonConvert.DeserializeObject<Projectile>(JSONString);
                         AddProj(proj);
                     }
 
                     else if (powerupValue != null)
                     {
-                        Powerup power = null;
-                        power = JsonConvert.DeserializeObject<Powerup>(JSONString);
+                        Powerup power = JsonConvert.DeserializeObject<Powerup>(JSONString);
                         AddPower(power);
                     }
                 }
@@ -367,7 +363,11 @@ namespace GameController
         private void AddProj(Projectile proj)
         {
             if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
+            {
+                theWorld.Projectiles.Remove(proj.getProjnum());
+                theWorld.Projectiles.Add(proj.getProjnum(), proj);
                 return;
+            }
 
             else if (proj.isDead())
                 theWorld.Projectiles.Remove(proj.getProjnum());
@@ -390,13 +390,17 @@ namespace GameController
         /// private helper method to add to the tank dictionary in theWorld
         /// </summary>
         /// <param name="tank"></param>
-        private void AddTank(Tank tank)
+        public void AddTank(Tank tank)
         {
-            if (theWorld.Tanks.ContainsKey(tank.GetID()))
-                return;
-
-            else if (tank.Disconnected())
+            if (tank.Disconnected() || tank.IsDead())
                 theWorld.Tanks.Remove(tank.GetID());
+
+            else if (theWorld.Tanks.ContainsKey(tank.GetID()) && !tank.IsDead())
+            {
+                theWorld.Tanks.Remove(tank.GetID());
+                theWorld.Tanks.Add(tank.GetID(), tank);
+                return;
+            }
 
             else
                 theWorld.Tanks.Add(tank.GetID(), tank);

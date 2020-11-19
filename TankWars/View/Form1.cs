@@ -111,9 +111,7 @@ namespace View
 
         private void HandleKeyDown(object sender, KeyEventArgs e)
         {
-            //Debug.WriteLine("button clicked");
             controller.HandleMoveRequest(e);
-            e.SuppressKeyPress = true;
             e.Handled = true;
             e.SuppressKeyPress = true;
         }
@@ -121,7 +119,6 @@ namespace View
         private void HandleKeyUp(object sender, KeyEventArgs e)
         {
             controller.HandleMoveCancel(e);
-            e.SuppressKeyPress = true;
             e.Handled = true;
             e.SuppressKeyPress = true;
         }
