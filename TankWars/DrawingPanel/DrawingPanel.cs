@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -26,14 +27,7 @@ namespace View
             theWorld = w;
             backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
             wallImage = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
-            string filePath = "..\\..\\..\\Resources\\images\\";
-            List<string> colors = new List<string>() { "Blue", "Green","Red", "Purple", "Dark", "Yellow","Orange"};
-            images = new Dictionary<string, Image>();
-            foreach(string color in colors)
-            {
-                images.Add(color, Image.FromFile(filePath + color + "Tank.png"));
-                images.Add(color + "Turret", Image.FromFile(filePath + color + "Turret.png"));
-            }
+            CreateTankImages();
         }
 
         /// <summary>
@@ -91,7 +85,6 @@ namespace View
         /// <param name="e"></param>
         protected override void OnPaint(PaintEventArgs e)
         {
-
             lock (theWorld)
             {
 
@@ -113,28 +106,55 @@ namespace View
                 BackgroundDrawer(null, e);
 
 
+                foreach (Wall wall in theWorld.Walls.Values)
+                    DrawWall(wall, e);
+
+                foreach (Powerup pow in theWorld.Powerups.Values)
+                    DrawObjectWithTransform(e, pow, worldSize, pow.getLocation().GetX(), pow.getLocation().GetY(), 0, PowerupDrawer);
+
                 foreach (Projectile proj in theWorld.Projectiles.Values)
                     DrawObjectWithTransform(e, proj, worldSize, proj.GetLocation().GetX(), proj.GetLocation().GetY(), proj.GetDirectionAngle(), ProjectileDrawer);
+
+                if(theWorld.Beams.Count > 0)
+                {
+                    int beamID = -1;
+                    foreach(Beam beam in theWorld.Beams.Values)
+                    {
+                        double x = beam.getOrigin().GetX();
+                        double y = beam.getOrigin().GetY();
+                        DrawObjectWithTransform(e, beam, worldSize, x, y, beam.getDirection().ToAngle(), BeamDrawer);
+                        beamID = beam.getID();
+                    }
+                    theWorld.Beams.Remove(beamID);
+                }
+
                 // Draw the players
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+                    if (controller.TurretOrientation != null && tank.GetID() == controller.getID())
+                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), controller.TurretOrientation.ToAngle(), TurretDrawer);
 
-                    //normalize the vector then pass into turretdrawer
-                    tank.TurretOrientation().Normalize();
-                    //DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
+                    else if(controller.TurretOrientation != null)
+                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
+                    
                 }
-
-                // Draw the powerups
-                foreach (Powerup pow in theWorld.Powerups.Values)
-                    DrawObjectWithTransform(e, pow, worldSize, pow.getLocation().GetX(), pow.getLocation().GetY(), 0, PowerupDrawer);
-
-
-                foreach (Wall wall in theWorld.Walls.Values)
-                    DrawWall(wall, e);
             }
             // Do anything that Panel(from which we inherit) needs to do
             base.OnPaint(e);
+        }
+
+        private void BeamDrawer(object o, PaintEventArgs e)
+        {
+            Beam b = o as Beam;
+            Pen pen = new Pen(Color.Aqua, 3);
+            Point p1 = new Point((int) b.getOrigin().GetX(), (int) b.getOrigin().GetY());
+            int owner = b.getOwner();
+            theWorld.Tanks.TryGetValue(owner, out Tank tank);
+
+            Point p2 = new Point((int)tank.TurretOrientation().GetX(), (int)tank.TurretOrientation().GetY());
+
+            e.Graphics.DrawLine(pen, p1, p2);
         }
 
         /// <summary>
@@ -151,7 +171,6 @@ namespace View
             {
                 if (isVertical)
                 {
-
                     DrawObjectWithTransform(e, wall, theWorld.size, wall.getP2().GetX(), y, 0, WallDrawer);
                     if (p1Greater)
                         y -= 50;
@@ -232,16 +251,16 @@ namespace View
         /// <param name="e"></param>
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
-/*            Projectile p = o as Projectile;
-            int ID = p.GetOwner();
-            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            if (theWorld.Tanks.TryGetValue(ID, out Tank player))
-            {
-                string color = player.Color();
-                Image i = Image.FromFile("..\\..\\..\\Resources\\images\\shot-" + color + ".png");
+            /*            Projectile p = o as Projectile;
+                        int ID = p.GetOwner();
+                        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                        if (theWorld.Tanks.TryGetValue(ID, out Tank player))
+                        {
+                            string color = player.Color();
+                            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\shot-" + color + ".png");
 
-                e.Graphics.DrawImage(i, i.Width/2, i.Height/2);
-            }*/
+                            e.Graphics.DrawImage(i, i.Width/2, i.Height/2);
+                        }*/
 
             int width = 8;
             int height = 8;
@@ -268,8 +287,8 @@ namespace View
         private void TurretDrawer(object o, PaintEventArgs e)
         {
             Tank tank = o as Tank;
-            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\RedTurret.png");
-            e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
+            images.TryGetValue(tank.Color() + "Turret", out Image image);
+            e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
         }
 
         /// <summary>
@@ -285,6 +304,21 @@ namespace View
             int height = backgroundImage.Height;
             Rectangle destinationRect = new Rectangle(0, 0, worldSize, worldSize);
             e.Graphics.DrawImage(backgroundImage, destinationRect, 0, 0, backgroundImage.Width, backgroundImage.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+        }
+
+        /// <summary>
+        /// private helper method  
+        /// </summary>
+        private void CreateTankImages()
+        {
+            string filePath = "..\\..\\..\\Resources\\images\\";
+            List<string> colors = new List<string>() { "Blue", "Green", "Red", "Purple", "Dark", "Yellow", "Orange" };
+            images = new Dictionary<string, Image>();
+            foreach (string color in colors)
+            {
+                images.Add(color, Image.FromFile(filePath + color + "Tank.png"));
+                images.Add(color + "Turret", Image.FromFile(filePath + color + "Turret.png"));
+            }
         }
     }
 }

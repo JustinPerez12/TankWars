@@ -42,6 +42,7 @@ namespace Model
 
         private string color;
 
+        public string fire;
         public Tank()
         {
             color = RandomColor();
@@ -113,9 +114,22 @@ namespace Model
             return aiming;
         }
 
+        /// <summary>
+        /// sets turret orientation with the given position of the Mouse on the screen
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
         public void SetTurretOrientation(double x, double y)
         {
+            x -= 400;
+            y -= 400;
             aiming = new Vector2D(x, y);
+            aiming.Normalize();
+        }
+
+        public int getHP()
+        {
+            return hitPoints;
         }
     }
 }

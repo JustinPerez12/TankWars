@@ -18,10 +18,11 @@ namespace GameController
         private int worldSize;
         private int ID;
 
+        //commands to send back to server
         public string moving;
         public string fire;
-        public string x;
-        public string y;
+        public string turretX;
+        public string turretY;
 
         public delegate void InputHandler();
         public event InputHandler InputArrived;
@@ -31,13 +32,15 @@ namespace GameController
 
         SocketState theServer = null;
 
+        public Vector2D TurretOrientation;
+
         public Controller()
         {
             theWorld = new World(worldSize);
             moving = "none";
             fire = "none";
-            x = "0";
-            y = "0";
+            turretX = "0";
+            turretY = "0";
             ID = -1;
             worldSize = 0;
         }
@@ -203,9 +206,10 @@ namespace GameController
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.Button == MouseButtons.Left)
             {
+
                 fire = "main";
             }
-            else if (e.Button == MouseButtons.Right && t.hasPowerup())
+            else if (e.Button == MouseButtons.Right)
             {
                 fire = "alt";
             }
@@ -238,10 +242,11 @@ namespace GameController
                 x1 -= 400;
                 y1 -= 400;
 
-                Vector2D vector = new Vector2D(x1, y1);
-                vector.Normalize();
-                x = vector.GetX().ToString();
-                y = vector.GetY().ToString();
+                //set this clients turret orientation
+                TurretOrientation = new Vector2D(x1, y1);
+                TurretOrientation.Normalize();
+                turretX = TurretOrientation.GetX().ToString();
+                turretY = TurretOrientation.GetY().ToString();
             }
         }
 
@@ -251,6 +256,7 @@ namespace GameController
         /// <param name="message"></param>
         public void MessageEntered(string message)
         {
+            Debug.WriteLine(message);
             Networking.Send(theServer.TheSocket, message + "\n");
         }
 
@@ -259,7 +265,7 @@ namespace GameController
         /// </summary>
         public void sendMessage()
         {
-            MessageEntered("{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + x + ",\"y\":" + y + "}}");
+            MessageEntered("{\"moving\":\"" + moving + "\",\"fire\":\"" + fire + "\",\"tdir\":{\"x\":" + turretX + ",\"y\":" + turretY + "}}");
         }
 
         /// <summary>
@@ -298,11 +304,13 @@ namespace GameController
                 JToken tankValue = obj["tank"];
                 JToken wallValue = obj["wall"];
                 JToken projValue = obj["proj"];
+                JToken beamValue = obj["beam"];
                 JToken powerupValue = obj["power"];
                 lock (theWorld)
                 {
                     if (tankValue != null)
                     {
+
                         Tank tank = JsonConvert.DeserializeObject<Tank>(JSONString);
                         AddTank(tank);
                     }
@@ -321,6 +329,12 @@ namespace GameController
                     {
                         Powerup power = JsonConvert.DeserializeObject<Powerup>(JSONString);
                         AddPower(power);
+                    }
+                    
+                    else if(beamValue != null)
+                    {
+                        Beam beam = JsonConvert.DeserializeObject<Beam>(JSONString);
+                        AddBeam(beam);
                     }
                 }
             }
@@ -341,17 +355,23 @@ namespace GameController
             }
         }
 
+        private void AddBeam(Beam beam)
+        {
+            theWorld.Beams.Add(beam.getID(), beam);
+        }
+
         /// <summary>
         /// private helper method to add to the powerup dictionary in theWorld
         /// </summary>
         /// <param name="power"></param>
         private void AddPower(Powerup power)
         {
-            if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
-                return;
-
-            else if (power.isDead())
+            if (power.isDead())
                 theWorld.Powerups.Remove(power.getPowerNum());
+
+            else if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
+                return;
+            
             else
                 theWorld.Powerups.Add(power.getPowerNum(), power);
         }
@@ -362,17 +382,19 @@ namespace GameController
         /// <param name="proj"></param>
         private void AddProj(Projectile proj)
         {
-            if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
+            if (proj.isDead())
+                theWorld.Projectiles.Remove(proj.getProjnum());
+
+            else if (theWorld.Projectiles.ContainsKey(proj.getProjnum()))
             {
                 theWorld.Projectiles.Remove(proj.getProjnum());
                 theWorld.Projectiles.Add(proj.getProjnum(), proj);
                 return;
             }
 
-            else if (proj.isDead())
-                theWorld.Projectiles.Remove(proj.getProjnum());
             else
                 theWorld.Projectiles.Add(proj.getProjnum(), proj);
+
         }
 
         /// <summary>
@@ -392,10 +414,10 @@ namespace GameController
         /// <param name="tank"></param>
         public void AddTank(Tank tank)
         {
-            if (tank.Disconnected() || tank.IsDead())
+            if (tank.Disconnected() || tank.getHP() == 0)
                 theWorld.Tanks.Remove(tank.GetID());
 
-            else if (theWorld.Tanks.ContainsKey(tank.GetID()) && !tank.IsDead())
+            else if (theWorld.Tanks.ContainsKey(tank.GetID()) && tank.getHP() > 0)
             {
                 theWorld.Tanks.Remove(tank.GetID());
                 theWorld.Tanks.Add(tank.GetID(), tank);

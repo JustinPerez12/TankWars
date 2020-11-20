@@ -8,6 +8,7 @@ namespace Model {
         public Dictionary<int, Projectile> Projectiles;
         public Dictionary<int, Wall> Walls;
         public Dictionary<int, Powerup> Powerups;
+        public Dictionary<int, Beam> Beams;
         public int size
         { get; private set; }
 
@@ -17,6 +18,7 @@ namespace Model {
             Projectiles = new Dictionary<int, Projectile>();
             Walls = new Dictionary<int, Wall>();
             Powerups = new Dictionary<int, Powerup>();
+            Beams = new Dictionary<int, Beam>();
             size = _size;
         }
 
