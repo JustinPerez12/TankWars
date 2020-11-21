@@ -17,6 +17,10 @@ namespace GameController
         private World theWorld;
         private int worldSize;
         private int ID;
+        private bool leftPressed;
+        private bool rightPressed;
+        private bool upPressed;
+        private bool downPressed;
 
         //commands to send back to server
         public string moving;
@@ -157,18 +161,22 @@ namespace GameController
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.KeyCode == Keys.W)
             {
+                upPressed = true;
                 moving = "up";
             }
             else if (e.KeyCode == Keys.A)
             {
+                leftPressed = true;
                 moving = "left";
             }
             else if (e.KeyCode == Keys.S)
             {
+                downPressed = true;
                 moving = "down";
             }
             else if (e.KeyCode == Keys.D)
             {
+                rightPressed = true;
                 moving = "right";
             }
         }
@@ -181,20 +189,46 @@ namespace GameController
         {
             if (e.KeyCode == Keys.W)
             {
-                moving = "none";
+                upPressed = false;
+                OtherButtonPressed(out string key);
+                moving = key;
             }
             else if (e.KeyCode == Keys.A)
             {
-                moving = "none";
+                leftPressed = false;
+                OtherButtonPressed(out string key);
+                moving = key;
             }
             else if (e.KeyCode == Keys.S)
             {
-                moving = "none";
+                downPressed = false;
+                OtherButtonPressed(out string key);
+                moving = key;
             }
             else if (e.KeyCode == Keys.D)
             {
-                moving = "none";
+                rightPressed = false;
+                OtherButtonPressed(out string key);
+                moving = key;
             }
+        }
+
+        private void OtherButtonPressed(out string key)
+        {
+            if (leftPressed)
+                key = "left";
+
+            else if (rightPressed)
+                key = "right";
+            
+            else if (upPressed)
+                key = "up";
+
+            else if (downPressed)
+                key = "down";
+
+            else
+                key = "none";
         }
 
         /// <summary>
@@ -256,7 +290,7 @@ namespace GameController
         /// <param name="message"></param>
         public void MessageEntered(string message)
         {
-            Debug.WriteLine(message);
+            //Debug.WriteLine(message);
             Networking.Send(theServer.TheSocket, message + "\n");
         }
 
@@ -310,7 +344,6 @@ namespace GameController
                 {
                     if (tankValue != null)
                     {
-
                         Tank tank = JsonConvert.DeserializeObject<Tank>(JSONString);
                         AddTank(tank);
                     }
@@ -330,8 +363,8 @@ namespace GameController
                         Powerup power = JsonConvert.DeserializeObject<Powerup>(JSONString);
                         AddPower(power);
                     }
-                    
-                    else if(beamValue != null)
+
+                    else if (beamValue != null)
                     {
                         Beam beam = JsonConvert.DeserializeObject<Beam>(JSONString);
                         AddBeam(beam);
@@ -371,7 +404,7 @@ namespace GameController
 
             else if (theWorld.Powerups.ContainsKey(power.getPowerNum()))
                 return;
-            
+
             else
                 theWorld.Powerups.Add(power.getPowerNum(), power);
         }

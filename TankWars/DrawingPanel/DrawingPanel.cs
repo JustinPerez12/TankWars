@@ -87,7 +87,6 @@ namespace View
         {
             lock (theWorld)
             {
-
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
@@ -148,13 +147,14 @@ namespace View
         {
             Beam b = o as Beam;
             Pen pen = new Pen(Color.Aqua, 3);
-            Point p1 = new Point((int) b.getOrigin().GetX(), (int) b.getOrigin().GetY());
+            Point p1 = new Point((int)b.getOrigin().GetX(), (int)b.getOrigin().GetY());
             int owner = b.getOwner();
             theWorld.Tanks.TryGetValue(owner, out Tank tank);
 
             Point p2 = new Point((int)tank.TurretOrientation().GetX(), (int)tank.TurretOrientation().GetY());
 
             e.Graphics.DrawLine(pen, p1, p2);
+
         }
 
         /// <summary>
