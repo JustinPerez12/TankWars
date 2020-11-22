@@ -213,23 +213,6 @@ namespace GameController
             }
         }
 
-        private void OtherButtonPressed(out string key)
-        {
-            if (leftPressed)
-                key = "left";
-
-            else if (rightPressed)
-                key = "right";
-            
-            else if (upPressed)
-                key = "up";
-
-            else if (downPressed)
-                key = "down";
-
-            else
-                key = "none";
-        }
 
         /// <summary>
         /// when a mouse button is clicked
@@ -458,9 +441,33 @@ namespace GameController
             }
 
             else
+            {
+                tank.setColor();
                 theWorld.Tanks.Add(tank.GetID(), tank);
+            }
         }
 
+        /// <summary>
+        /// Private helper method to determine if another key is being pressed. Creates smooth movement
+        /// </summary>
+        /// <param name="key"></param>
+        private void OtherButtonPressed(out string key)
+        {
+            if (leftPressed)
+                key = "left";
+
+            else if (rightPressed)
+                key = "right";
+
+            else if (upPressed)
+                key = "up";
+
+            else if (downPressed)
+                key = "down";
+
+            else
+                key = "none";
+        }
 
     }
 }

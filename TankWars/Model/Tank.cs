@@ -45,16 +45,14 @@ namespace Model
         public string fire;
         public Tank()
         {
-            color = RandomColor();
         }
 
-        private string RandomColor()
+        public void setColor()
         {
             List<string> colors = new List<string>() { "Blue", "Green", "Red", "Purple", "Dark", "Yellow", "Orange" };
             Random random = new Random();
             int i = random.Next(0, 6);
-
-            return colors[i];
+            color = colors[i];
         }
 
         public string Color()
