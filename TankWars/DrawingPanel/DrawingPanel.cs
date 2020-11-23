@@ -32,7 +32,7 @@ namespace View {
             controller = controller1;
             DoubleBuffered = true;
             theWorld = w;
-            backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
+            backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background2.png");
             wallImage = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
             oldTank = Image.FromFile("..\\..\\..\\Resources\\images\\LightGreenTank.png");
             oldTurret = Image.FromFile("..\\..\\..\\Resources\\images\\LightGreenTurret.png");
