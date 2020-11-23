@@ -167,10 +167,5 @@ namespace View
         {
             controller.HandleMouseMove(e);
         }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }
