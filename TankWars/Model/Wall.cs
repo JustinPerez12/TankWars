@@ -28,6 +28,24 @@ namespace Model {
             return wallNum;
         }
 
+
+        public Vector2D getP1()
+        {
+            return p1;
+        }
+
+        public Vector2D getP2()
+        {
+            return p2;
+        }
+
+        /// <summary>
+        /// gets the amount of walls needed to draw and determines whether the wall is a vertical one or a horizontal one
+        /// Also determines which direction we need to draw in
+        /// </summary>
+        /// <param name="isVertical"></param>
+        /// <param name="p1Greater"></param>
+        /// <returns></returns>
         public int numofWalls(out bool isVertical, out bool p1Greater)
         {
             if (p1.GetX() == p2.GetX())
@@ -59,17 +77,6 @@ namespace Model {
             p1Greater = false;
             isVertical = false;
             return -1;
-
-        }
-
-        public Vector2D getP1()
-        {
-            return p1;
-        }
-
-        public Vector2D getP2()
-        {
-            return p2;
         }
 
     }

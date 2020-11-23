@@ -41,8 +41,6 @@ namespace Model
         private bool joined;
 
         private string color;
-
-        public string fire;
         public Tank()
         {
         }
@@ -87,6 +85,7 @@ namespace Model
         {
             return joined;
         }
+
         public Vector2D GetLocation()
         {
             return location;
@@ -101,33 +100,15 @@ namespace Model
         {
             location = l;
         }
+
         public void SetOrientation(Vector2D o)
         {
             orientation = o;
         }
 
-        public bool hasPowerup()
-        {
-            //need to implement. this is how we will tell if a tank has picked up a powerup. dont know how to do this yet tho
-            return true;
-        }
-
         public Vector2D TurretOrientation()
         {
             return aiming;
-        }
-
-        /// <summary>
-        /// sets turret orientation with the given position of the Mouse on the screen
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        public void SetTurretOrientation(double x, double y)
-        {
-            x -= 400;
-            y -= 400;
-            aiming = new Vector2D(x, y);
-            aiming.Normalize();
         }
 
         public int getHP()
@@ -143,6 +124,19 @@ namespace Model
         public int getScore()
         {
             return score;
+        }
+
+        /// <summary>
+        /// sets turret orientation with the given position of the Mouse on the screen
+        /// </summary>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        public void SetTurretOrientation(double x, double y)
+        {
+            x -= 400;
+            y -= 400;
+            aiming = new Vector2D(x, y);
+            aiming.Normalize();
         }
     }
 }

@@ -17,7 +17,6 @@ namespace Model {
         [JsonProperty(PropertyName = "died")]
         private bool died;
 
-
         public Powerup()
         {
 
