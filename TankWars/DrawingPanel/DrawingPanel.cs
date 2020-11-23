@@ -9,8 +9,10 @@ using GameController;
 using Model;
 using TankWars;
 
-namespace View {
-    public class DrawingPanel : Panel {
+namespace View
+{
+    public class DrawingPanel : Panel
+    {
         private World theWorld;
         private Controller controller;
         private int viewSize = 800;
@@ -25,8 +27,8 @@ namespace View {
         private Image highHealth;
 
         Dictionary<string, Image> images;
-
-
+        double deathLocationX = -1;
+        double deathLocationY = -1;
         public DrawingPanel(World w, Controller controller1)
         {
             controller = controller1;
@@ -98,12 +100,13 @@ namespace View {
         {
             lock (theWorld)
             {
+
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
                     double playerX = player.GetLocation().GetX();
-
-                    //double ratio = (double)viewSize / (double)theWorld.getSize();
+                    deathLocationY = player.GetLocation().GetY();
+                    deathLocationX = player.GetLocation().GetX();
                     double ratio = (double)viewSize / (double)2000;
                     int halfSizeScaled = (int)(worldSize / 2.0 * ratio);
 
@@ -111,16 +114,30 @@ namespace View {
                     double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, playerY) + halfSizeScaled;
 
                     e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
-
                     BackgroundDrawer(null, e);
+
                 }
-                else
+
+                else if (controller.getID() == -1)
                 {
                     Image i = Image.FromFile("..\\..\\..\\Resources\\images\\tankwars-title.jpg");
                     int width = i.Width;
                     int height = i.Height;
                     Rectangle destinationRect = new Rectangle(0, 0, width, height);
                     e.Graphics.DrawImage(i, destinationRect, 0, 0, i.Width, i.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+                }
+                else
+                {
+                    if (deathLocationY != -1)
+                    {
+
+                        double ratio = (double)viewSize / (double)2000;
+                        int halfSizeScaled = (int)(worldSize / 2.0 * ratio);
+                        double inverseTranslateX = -WorldSpaceToImageSpace(worldSize, deathLocationX) + halfSizeScaled;
+                        double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, deathLocationY) + halfSizeScaled;
+                        e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
+                    }
+                    BackgroundDrawer(null, e);
                 }
 
 
@@ -151,11 +168,14 @@ namespace View {
                 {
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX() - (tank.getName().Length * 12) / 2, tank.GetLocation().GetY() + 30, 0, nameDrawer);
-                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX() + lowHealth.Width/2 - 36, tank.GetLocation().GetY() - 30, 0, healthDrawer);
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX() + lowHealth.Width / 2 - 36, tank.GetLocation().GetY() - 30, 0, healthDrawer);
+
                     if (controller.TurretOrientation != null && tank.GetID() == controller.getID())
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), controller.TurretOrientation.ToAngle(), TurretDrawer);
+
                     else if (controller.TurretOrientation == null && tank.GetID() == controller.getID())
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), 0, TurretDrawer);
+
                     else if (controller.TurretOrientation != null)
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
                 }
@@ -232,7 +252,7 @@ namespace View {
         private void healthDrawer(object o, PaintEventArgs e)
         {
             Tank t = o as Tank;
-            if(t.getHP() == 3)
+            if (t.getHP() == 3)
             {
                 e.Graphics.DrawImage(highHealth, -highHealth.Width / 2, -highHealth.Height / 2);
             }
