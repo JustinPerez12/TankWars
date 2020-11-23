@@ -242,10 +242,17 @@ namespace GameController
             }
 
             if (tank.getHP() == 0)
+            {
                 theWorld.Tanks.Remove(tank.GetID());
+                theWorld.DeadTanks.Add(tank.GetID(), tank);
+            }
 
             else if (theWorld.Tanks.ContainsKey(tank.GetID()) && tank.getHP() > 0)
             {
+                if(theWorld.DeadTanks.ContainsKey(tank.GetID()))
+                {
+                    theWorld.DeadTanks.Remove(tank.GetID());
+                }
                 theWorld.playerColors.TryGetValue(tank.GetID(), out string color);
                 theWorld.Tanks.Remove(tank.GetID());
                 tank.setColor(color);
