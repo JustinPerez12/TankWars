@@ -77,7 +77,6 @@ namespace View
         {
             lock (theWorld)
             {
-
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
@@ -147,8 +146,8 @@ namespace View
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX() + lowHealth.Width / 2 - 36, tank.GetLocation().GetY() - 30, 0, HealthDrawer);
 
                     //Draw other players
-                    if(tank.GetID() != controller.getID())
-                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
+                    if (tank.GetID() != controller.getID())
+                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
 
                     //Draw the user
                     else if (controller.TurretOrientation != null && tank.GetID() == controller.getID())
@@ -261,17 +260,6 @@ namespace View
         /// <param name="e"></param>
         private void ProjectileDrawer(object o, PaintEventArgs e)
         {
-            /*            Projectile p = o as Projectile;
-                        int ID = p.GetOwner();
-                        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                        if (theWorld.Tanks.TryGetValue(ID, out Tank player))
-                        {
-                            string color = player.Color();
-                            Image i = Image.FromFile("..\\..\\..\\Resources\\images\\shot-" + color + ".png");
-
-                            e.Graphics.DrawImage(i, i.Width/2, i.Height/2);
-                        }*/
-
             int width = 8;
             int height = 8;
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -283,11 +271,12 @@ namespace View
                 // So if we want the circle centered on the powerup's location, we have to offset it
                 // by half its size to the left (-width/2) and up (-height/2)
                 Rectangle r = new Rectangle(-(width / 2), -(height / 2), width, height);
-                e.Graphics.FillEllipse(yellowBrush, r);
+                e.Graphics.FillEllipse(redBrush, r);
             }
+
         }
 
-        /// <summary>
+        /// <summary>a
         /// Acts as a drawing delegate for DrawObjectWithTransform
         /// After performing the necessary transformation (translate/rotate)
         /// DrawObjectWithTransform will invoke this method to draw a turret
@@ -316,7 +305,7 @@ namespace View
         private void BeamDrawer(object o, PaintEventArgs e)
         {
             Beam beam = o as Beam;
-            Pen pen = new Pen(Color.Black, 3);
+            Pen pen = new Pen(Color.Black, 10);
             Point p1 = new Point(0, -worldSize * 2);
             Point p2 = new Point(0, 0);
             e.Graphics.DrawLine(pen, p1, p2);
@@ -404,7 +393,8 @@ namespace View
             images.Add("medHealth", Image.FromFile("..\\..\\..\\Resources\\images\\halfHealth.png"));
             images.Add("highHealth", Image.FromFile("..\\..\\..\\Resources\\images\\fullHealth.png"));
             images.Add("titleScreen", Image.FromFile("..\\..\\..\\Resources\\images\\tankwars-title.jpg"));
-    }
+            images.Add("shot-green", Image.FromFile("..\\..\\..\\Resources\\images\\shot-green.png"));
+        }
     }
 }
 

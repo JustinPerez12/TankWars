@@ -233,16 +233,16 @@ namespace GameController
         /// private helper method to add to the tank dictionary in theWorld
         /// </summary>
         /// <param name="tank"></param>
-        public void AddTank(Tank tank)
+        private void AddTank(Tank tank)
         {
             if (tank.Disconnected())
             {
                 theWorld.Tanks.Remove(tank.GetID());
                 theWorld.playerColors.Remove(tank.GetID());
             }
+
             if (tank.getHP() == 0)
                 theWorld.Tanks.Remove(tank.GetID());
-
 
             else if (theWorld.Tanks.ContainsKey(tank.GetID()) && tank.getHP() > 0)
             {
@@ -343,7 +343,6 @@ namespace GameController
                 key = "none";
         }
 
-
         /// <summary>
         /// when a mouse button is clicked
         /// </summary>
@@ -397,7 +396,6 @@ namespace GameController
             }
         }
 
-
         /// <summary>
         /// wrapper for our wrapper that has the command ready to go
         /// </summary>
@@ -414,7 +412,6 @@ namespace GameController
         {
             Networking.Send(theServer.TheSocket, message + "\n");
         }
-
 
         /// <summary>
         /// helper method to get the ID of this client

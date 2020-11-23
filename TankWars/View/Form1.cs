@@ -31,7 +31,6 @@ namespace View
             controller.InputArrived += DisplayInput;
             controller.error += ErrorEvent;
 
-
             theWorld = controller.getWorld();
             panel = new DrawingPanel(theWorld, controller);
             //panel.Location = new Point(0, menuSize);
