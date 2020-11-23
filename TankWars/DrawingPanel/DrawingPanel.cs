@@ -127,6 +127,9 @@ namespace View
                 foreach (Projectile proj in theWorld.Projectiles.Values)
                     DrawObjectWithTransform(e, proj, worldSize, proj.GetLocation().GetX(), proj.GetLocation().GetY(), proj.GetDirectionAngle(), ProjectileDrawer);
 
+                foreach (Tank tank in theWorld.DeadTanks.Values)
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), 0, DeadTankDrawer);
+
                 int beamID = -1;
                 foreach (Beam beam in theWorld.Beams.Values)
                 {
@@ -295,6 +298,12 @@ namespace View
             }
         }
 
+        private void DeadTankDrawer(object o, PaintEventArgs e)
+        {
+            images.TryGetValue("destroy", out Image destroy);
+            e.Graphics.DrawImage(destroy, -destroy.Width / 2, -destroy.Height / 2);
+        }
+
         /// <summary>
         /// Acts as a drawing delegate for DrawObjectWithTransform
         /// After performing the necessary transformation (translate/rotate)
@@ -394,6 +403,7 @@ namespace View
             images.Add("highHealth", Image.FromFile("..\\..\\..\\Resources\\images\\fullHealth.png"));
             images.Add("titleScreen", Image.FromFile("..\\..\\..\\Resources\\images\\tankwars-title.jpg"));
             images.Add("shot-green", Image.FromFile("..\\..\\..\\Resources\\images\\shot-green.png"));
+            images.Add("destroy", Image.FromFile("..\\..\\..\\Resources\\images\\destroy.png"));
         }
     }
 }
