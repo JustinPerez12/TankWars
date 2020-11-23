@@ -66,6 +66,10 @@
       <Project>{A5B81547-F181-4517-A67D-F64F33AC12C9}</Project>
       <Name>Model</Name>
     </ProjectReference>
+    <ProjectReference Include="..\NetworkController\NetworkController.csproj">
+      <Project>{1820236e-b0d1-4bea-9d4b-ef75e72e0e9d}</Project>
+      <Name>NetworkController</Name>
+    </ProjectReference>
     <ProjectReference Include="..\World\World.csproj">
       <Project>{329c18ae-15fa-4233-93ae-fdf8ec041de0}</Project>
       <Name>World</Name>
