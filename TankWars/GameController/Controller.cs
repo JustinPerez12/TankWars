@@ -157,7 +157,6 @@ namespace GameController
         /// <param name="e"></param>
         public void HandleMoveRequest(KeyEventArgs e)
         {
-            //Debug.WriteLine("inpuit");
             theWorld.Tanks.TryGetValue(ID, out Tank t);
             if (e.KeyCode == Keys.W)
             {
@@ -273,7 +272,6 @@ namespace GameController
         /// <param name="message"></param>
         public void MessageEntered(string message)
         {
-            //Debug.WriteLine(message);
             Networking.Send(theServer.TheSocket, message + "\n");
         }
 
@@ -430,20 +428,29 @@ namespace GameController
         /// <param name="tank"></param>
         public void AddTank(Tank tank)
         {
-            if (tank.Disconnected() || tank.getHP() == 0)
+            if (tank.Disconnected())
+            {
                 theWorld.Tanks.Remove(tank.GetID());
+                //theWorld.playerColors.Remove(tank.GetID());
+            }
+            if (tank.getHP() == 0)
+                theWorld.Tanks.Remove(tank.GetID());
+
 
             else if (theWorld.Tanks.ContainsKey(tank.GetID()) && tank.getHP() > 0)
             {
+                theWorld.playerColors.TryGetValue(tank.GetID(), out string color);
                 theWorld.Tanks.Remove(tank.GetID());
+                tank.setColor(color);
                 theWorld.Tanks.Add(tank.GetID(), tank);
                 return;
             }
 
             else
             {
-                tank.setColor();
+                tank.randomColor();
                 theWorld.Tanks.Add(tank.GetID(), tank);
+                theWorld.playerColors.Add(tank.GetID(), tank.Color());
             }
         }
 

@@ -47,12 +47,17 @@ namespace Model
         {
         }
 
-        public void setColor()
+        public void randomColor()
         {
             List<string> colors = new List<string>() { "Blue", "Green", "Red", "Purple", "Dark", "Yellow", "Orange" };
             Random random = new Random();
             int i = random.Next(0, 6);
             color = colors[i];
+        }
+
+        public void setColor(string newColor)
+        {
+            color = newColor;
         }
 
         public string Color()

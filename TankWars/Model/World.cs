@@ -9,6 +9,7 @@ namespace Model {
         public Dictionary<int, Wall> Walls;
         public Dictionary<int, Powerup> Powerups;
         public Dictionary<int, Beam> Beams;
+        public Dictionary<int, string> playerColors;
         public int size
         { get; private set; }
 
@@ -19,6 +20,7 @@ namespace Model {
             Walls = new Dictionary<int, Wall>();
             Powerups = new Dictionary<int, Powerup>();
             Beams = new Dictionary<int, Beam>();
+            playerColors = new Dictionary<int, string>();
             size = _size;
         }
 

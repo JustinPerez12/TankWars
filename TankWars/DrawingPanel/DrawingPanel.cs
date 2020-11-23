@@ -1,11 +1,13 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using GameController;
 using Model;
+using TankWars;
 
 namespace View
 {
@@ -17,6 +19,8 @@ namespace View
         private int worldSize = 2000;
         private Image backgroundImage;
         private Image wallImage;
+        private Image oldTank;
+        private Image oldTurret;
         Dictionary<string, Image> images;
 
 
@@ -27,6 +31,9 @@ namespace View
             theWorld = w;
             backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
             wallImage = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
+
+            oldTank = Image.FromFile("..\\..\\..\\Resources\\images\\LightGreenTank.png");
+            oldTurret = Image.FromFile("..\\..\\..\\Resources\\images\\LightGreenTurret.png");
             CreateTankImages();
         }
 
@@ -63,10 +70,7 @@ namespace View
 
             int x = WorldSpaceToImageSpace(worldSize, worldX);
             int y = WorldSpaceToImageSpace(worldSize, worldY);
-            /*            int x = 00;
-                        int y = 0;*/
             e.Graphics.TranslateTransform(x, y);
-            //Debug.WriteLine(angle.ToString());
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
 
@@ -100,9 +104,17 @@ namespace View
                     double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, playerY) + halfSizeScaled;
 
                     e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
-                }
 
-                BackgroundDrawer(null, e);
+                    BackgroundDrawer(null, e);
+                }
+                else
+                {
+                    Image i = Image.FromFile("..\\..\\..\\Resources\\images\\tankwars-title.jpg");
+                    int width = i.Width;
+                    int height = i.Height;
+                    Rectangle destinationRect = new Rectangle(0, 0, width, height);
+                    e.Graphics.DrawImage(i, destinationRect, 0, 0, i.Width, i.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+                }
 
 
                 foreach (Wall wall in theWorld.Walls.Values)
@@ -133,10 +145,10 @@ namespace View
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
                     if (controller.TurretOrientation != null && tank.GetID() == controller.getID())
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), controller.TurretOrientation.ToAngle(), TurretDrawer);
-
+                    else if(controller.TurretOrientation == null && tank.GetID() == controller.getID())
+                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), 0, TurretDrawer);
                     else if(controller.TurretOrientation != null)
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
-                    
                 }
             }
             // Do anything that Panel(from which we inherit) needs to do
@@ -198,8 +210,14 @@ namespace View
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank tank = o as Tank;
-            images.TryGetValue(tank.Color(), out Image image);
-            e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
+            if(tank.Color() != null)
+            {
+                if (images.TryGetValue(tank.Color(), out Image image))
+                {
+                    Rectangle destinationRect = new Rectangle(-oldTank.Width/2, -oldTank.Height / 2, oldTank.Width+30, oldTank.Height+30);
+                    e.Graphics.DrawImage(image, destinationRect, 100, 100, image.Width, image.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+                }
+            }
         }
 
         /// <summary>
@@ -287,8 +305,14 @@ namespace View
         private void TurretDrawer(object o, PaintEventArgs e)
         {
             Tank tank = o as Tank;
-            images.TryGetValue(tank.Color() + "Turret", out Image image);
-            e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
+            if (tank.Color() != null)
+            {
+                images.TryGetValue(tank.Color() + "Turret", out Image image);
+                //e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
+
+                Rectangle destinationRect = new Rectangle(-oldTurret.Width / 2, -oldTurret.Height / 2, oldTurret.Width + 30, oldTurret.Height + 30);
+                e.Graphics.DrawImage(image, destinationRect, 100, 100, image.Width, image.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+            }
         }
 
         /// <summary>
