@@ -39,14 +39,14 @@
             // nameBox
             // 
             this.nameBox.BackColor = System.Drawing.SystemColors.Window;
-            this.nameBox.Location = new System.Drawing.Point(205, 12);
+            this.nameBox.Location = new System.Drawing.Point(349, 357);
             this.nameBox.Name = "nameBox";
             this.nameBox.Size = new System.Drawing.Size(100, 20);
             this.nameBox.TabIndex = 0;
             // 
             // serverAddress
             // 
-            this.serverAddress.Location = new System.Drawing.Point(56, 12);
+            this.serverAddress.Location = new System.Drawing.Point(157, 356);
             this.serverAddress.Name = "serverAddress";
             this.serverAddress.Size = new System.Drawing.Size(100, 20);
             this.serverAddress.TabIndex = 1;
@@ -54,7 +54,7 @@
             // connectButton
             // 
             this.connectButton.BackColor = System.Drawing.Color.Transparent;
-            this.connectButton.Location = new System.Drawing.Point(322, 9);
+            this.connectButton.Location = new System.Drawing.Point(511, 357);
             this.connectButton.Name = "connectButton";
             this.connectButton.Size = new System.Drawing.Size(75, 23);
             this.connectButton.TabIndex = 2;
@@ -67,7 +67,7 @@
             this.serverLabel.AutoSize = true;
             this.serverLabel.BackColor = System.Drawing.Color.Transparent;
             this.serverLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.serverLabel.Location = new System.Drawing.Point(12, 15);
+            this.serverLabel.Location = new System.Drawing.Point(93, 360);
             this.serverLabel.Name = "serverLabel";
             this.serverLabel.Size = new System.Drawing.Size(38, 13);
             this.serverLabel.TabIndex = 3;
@@ -78,7 +78,7 @@
             this.nameLabel.AutoSize = true;
             this.nameLabel.BackColor = System.Drawing.Color.Transparent;
             this.nameLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.nameLabel.Location = new System.Drawing.Point(164, 14);
+            this.nameLabel.Location = new System.Drawing.Point(297, 360);
             this.nameLabel.Name = "nameLabel";
             this.nameLabel.Size = new System.Drawing.Size(35, 13);
             this.nameLabel.TabIndex = 4;

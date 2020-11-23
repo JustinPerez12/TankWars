@@ -167,6 +167,5 @@ namespace View
         {
             controller.HandleMouseMove(e);
         }
-
     }
 }
