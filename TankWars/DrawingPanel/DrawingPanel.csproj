@@ -30,12 +30,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Player">
-      <HintPath>..\Resources\Libraries\Player.dll</HintPath>
-    </Reference>
-    <Reference Include="Powerup">
-      <HintPath>..\Resources\Libraries\Powerup.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -69,10 +63,6 @@
     <ProjectReference Include="..\NetworkController\NetworkController.csproj">
       <Project>{1820236e-b0d1-4bea-9d4b-ef75e72e0e9d}</Project>
       <Name>NetworkController</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\World\World.csproj">
-      <Project>{329c18ae-15fa-4233-93ae-fdf8ec041de0}</Project>
-      <Name>World</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
