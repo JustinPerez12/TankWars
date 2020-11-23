@@ -34,7 +34,7 @@ namespace View
             theWorld = controller.getWorld();
             panel = new DrawingPanel(theWorld, controller);
             //panel.Location = new Point(0, menuSize);
-            panel.Location = new Point(0, menuSize);
+            panel.Location = new Point(0, 0);
             panel.Size = new Size(viewSize, viewSize);
             this.Controls.Add(panel);
 
