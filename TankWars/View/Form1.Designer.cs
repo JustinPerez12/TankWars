@@ -38,6 +38,7 @@
             // 
             // nameBox
             // 
+            this.nameBox.BackColor = System.Drawing.SystemColors.Window;
             this.nameBox.Location = new System.Drawing.Point(205, 12);
             this.nameBox.Name = "nameBox";
             this.nameBox.Size = new System.Drawing.Size(100, 20);
@@ -52,17 +53,20 @@
             // 
             // connectButton
             // 
+            this.connectButton.BackColor = System.Drawing.Color.Transparent;
             this.connectButton.Location = new System.Drawing.Point(322, 9);
             this.connectButton.Name = "connectButton";
             this.connectButton.Size = new System.Drawing.Size(75, 23);
             this.connectButton.TabIndex = 2;
             this.connectButton.Text = "Connect";
-            this.connectButton.UseVisualStyleBackColor = true;
+            this.connectButton.UseVisualStyleBackColor = false;
             this.connectButton.Click += new System.EventHandler(this.connectButton_Click_1);
             // 
             // serverLabel
             // 
             this.serverLabel.AutoSize = true;
+            this.serverLabel.BackColor = System.Drawing.Color.Transparent;
+            this.serverLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.serverLabel.Location = new System.Drawing.Point(12, 15);
             this.serverLabel.Name = "serverLabel";
             this.serverLabel.Size = new System.Drawing.Size(38, 13);
@@ -72,6 +76,8 @@
             // nameLabel
             // 
             this.nameLabel.AutoSize = true;
+            this.nameLabel.BackColor = System.Drawing.Color.Transparent;
+            this.nameLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
             this.nameLabel.Location = new System.Drawing.Point(164, 14);
             this.nameLabel.Name = "nameLabel";
             this.nameLabel.Size = new System.Drawing.Size(35, 13);
@@ -87,6 +93,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
             this.ClientSize = new System.Drawing.Size(784, 801);
             this.Controls.Add(this.nameLabel);
             this.Controls.Add(this.serverLabel);

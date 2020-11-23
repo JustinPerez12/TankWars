@@ -314,7 +314,7 @@ namespace View
         private void BeamDrawer(object o, PaintEventArgs e)
         {
             Beam beam = o as Beam;
-            Pen pen = new Pen(Color.Black, 10);
+            Pen pen = new Pen(Color.Black, 20);
             Point p1 = new Point(0, -worldSize * 2);
             Point p2 = new Point(0, 0);
             e.Graphics.DrawLine(pen, p1, p2);
@@ -375,8 +375,6 @@ namespace View
         private void BackgroundDrawer(object o, PaintEventArgs e)
         {
             images.TryGetValue("backgroundImage", out Image backgroundImage);
-            int width = backgroundImage.Width;
-            int height = backgroundImage.Height;
             Rectangle destinationRect = new Rectangle(0, 0, worldSize, worldSize);
             e.Graphics.DrawImage(backgroundImage, destinationRect, 0, 0, backgroundImage.Width, backgroundImage.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
         }

@@ -22,7 +22,6 @@ namespace View
         World theWorld;
 
         private const int viewSize = 800;
-        private const int menuSize = 40;
         public Form1()
         {
             InitializeComponent();
@@ -104,12 +103,15 @@ namespace View
             // Disable the controls and try to connect
             connectButton.Enabled = false;
             serverAddress.Enabled = false;
-
+            connectButton.Visible = false;
+            serverAddress.Visible = false;
+            nameLabel.Visible = false;
+            serverLabel.Visible = false;
             controller.Connect(serverAddress.Text);
-
             string name = nameBox.Text;
-            nameBox.Enabled = false;
             controller.MessageEntered(name);
+            nameBox.Enabled = false;
+            nameBox.Visible = false;
         }
 
         /// <summary>
@@ -165,5 +167,6 @@ namespace View
         {
             controller.HandleMouseMove(e);
         }
+
     }
 }
