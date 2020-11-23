@@ -273,7 +273,8 @@ namespace GameController
         /// <param name="message"></param>
         public void MessageEntered(string message)
         {
-            //Debug.WriteLine(message);
+
+
             Networking.Send(theServer.TheSocket, message + "\n");
         }
 

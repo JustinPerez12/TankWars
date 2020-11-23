@@ -131,8 +131,10 @@ namespace View
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
+
                     if (controller.TurretOrientation != null && tank.GetID() == controller.getID())
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), controller.TurretOrientation.ToAngle(), TurretDrawer);
+
 
                     else if(controller.TurretOrientation != null)
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
