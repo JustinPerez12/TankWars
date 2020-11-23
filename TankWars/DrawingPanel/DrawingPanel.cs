@@ -1,22 +1,29 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using GameController;
 using Model;
+using TankWars;
 
-namespace View
-{
-    public class DrawingPanel : Panel
-    {
+namespace View {
+    public class DrawingPanel : Panel {
         private World theWorld;
         private Controller controller;
         private int viewSize = 800;
         private int worldSize = 2000;
+
         private Image backgroundImage;
         private Image wallImage;
+        private Image oldTank;
+        private Image oldTurret;
+        private Image lowHealth;
+        private Image medHealth;
+        private Image highHealth;
+
         Dictionary<string, Image> images;
 
 
@@ -27,6 +34,13 @@ namespace View
             theWorld = w;
             backgroundImage = Image.FromFile("..\\..\\..\\Resources\\images\\Background.png");
             wallImage = Image.FromFile("..\\..\\..\\Resources\\images\\WallSprite.png");
+            oldTank = Image.FromFile("..\\..\\..\\Resources\\images\\LightGreenTank.png");
+            oldTurret = Image.FromFile("..\\..\\..\\Resources\\images\\LightGreenTurret.png");
+
+            lowHealth = Image.FromFile("..\\..\\..\\Resources\\images\\lowHealth.png");
+            medHealth = Image.FromFile("..\\..\\..\\Resources\\images\\halfHealth.png");
+            highHealth = Image.FromFile("..\\..\\..\\Resources\\images\\fullHealth.png");
+
             CreateTankImages();
         }
 
@@ -63,10 +77,7 @@ namespace View
 
             int x = WorldSpaceToImageSpace(worldSize, worldX);
             int y = WorldSpaceToImageSpace(worldSize, worldY);
-            /*            int x = 00;
-                        int y = 0;*/
             e.Graphics.TranslateTransform(x, y);
-            //Debug.WriteLine(angle.ToString());
             e.Graphics.RotateTransform((float)angle);
             drawer(o, e);
 
@@ -100,9 +111,17 @@ namespace View
                     double inverseTranslateY = -WorldSpaceToImageSpace(worldSize, playerY) + halfSizeScaled;
 
                     e.Graphics.TranslateTransform((float)inverseTranslateX, (float)inverseTranslateY);
-                }
 
-                BackgroundDrawer(null, e);
+                    BackgroundDrawer(null, e);
+                }
+                else
+                {
+                    Image i = Image.FromFile("..\\..\\..\\Resources\\images\\tankwars-title.jpg");
+                    int width = i.Width;
+                    int height = i.Height;
+                    Rectangle destinationRect = new Rectangle(0, 0, width, height);
+                    e.Graphics.DrawImage(i, destinationRect, 0, 0, i.Width, i.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+                }
 
 
                 foreach (Wall wall in theWorld.Walls.Values)
@@ -114,10 +133,10 @@ namespace View
                 foreach (Projectile proj in theWorld.Projectiles.Values)
                     DrawObjectWithTransform(e, proj, worldSize, proj.GetLocation().GetX(), proj.GetLocation().GetY(), proj.GetDirectionAngle(), ProjectileDrawer);
 
-                if(theWorld.Beams.Count > 0)
+                if (theWorld.Beams.Count > 0)
                 {
                     int beamID = -1;
-                    foreach(Beam beam in theWorld.Beams.Values)
+                    foreach (Beam beam in theWorld.Beams.Values)
                     {
                         double x = beam.getOrigin().GetX();
                         double y = beam.getOrigin().GetY();
@@ -131,14 +150,14 @@ namespace View
                 foreach (Tank tank in theWorld.Tanks.Values)
                 {
                     DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.GetOrientation().ToAngle(), TankDrawer);
-
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX() - (tank.getName().Length * 12) / 2, tank.GetLocation().GetY() + 30, 0, nameDrawer);
+                    DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX() + lowHealth.Width/2 - 36, tank.GetLocation().GetY() - 30, 0, healthDrawer);
                     if (controller.TurretOrientation != null && tank.GetID() == controller.getID())
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), controller.TurretOrientation.ToAngle(), TurretDrawer);
-
-
-                    else if(controller.TurretOrientation != null)
+                    else if (controller.TurretOrientation == null && tank.GetID() == controller.getID())
+                        DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), 0, TurretDrawer);
+                    else if (controller.TurretOrientation != null)
                         DrawObjectWithTransform(e, tank, worldSize, tank.GetLocation().GetX(), tank.GetLocation().GetY(), tank.TurretOrientation().ToAngle(), TurretDrawer);
-                    
                 }
             }
             // Do anything that Panel(from which we inherit) needs to do
@@ -153,7 +172,7 @@ namespace View
             int owner = b.getOwner();
             theWorld.Tanks.TryGetValue(owner, out Tank tank);
 
-            Point p2 = new Point((int)tank.TurretOrientation().GetX(), (int)tank.TurretOrientation().GetY());
+            Point p2 = new Point((int)b.getDirection().GetX(), (int)b.getDirection().GetY());
 
             e.Graphics.DrawLine(pen, p1, p2);
 
@@ -200,8 +219,31 @@ namespace View
         private void TankDrawer(object o, PaintEventArgs e)
         {
             Tank tank = o as Tank;
-            images.TryGetValue(tank.Color(), out Image image);
-            e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
+            if (tank.Color() != null)
+            {
+                if (images.TryGetValue(tank.Color(), out Image image))
+                {
+                    Rectangle destinationRect = new Rectangle(-oldTank.Width / 2, -oldTank.Height / 2, oldTank.Width + 30, oldTank.Height + 30);
+                    e.Graphics.DrawImage(image, destinationRect, 100, 100, image.Width, image.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+                }
+            }
+        }
+
+        private void healthDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+            if(t.getHP() == 3)
+            {
+                e.Graphics.DrawImage(highHealth, -highHealth.Width / 2, -highHealth.Height / 2);
+            }
+            else if (t.getHP() == 2)
+            {
+                e.Graphics.DrawImage(medHealth, -medHealth.Width / 2, -medHealth.Height / 2);
+            }
+            else if (t.getHP() == 1)
+            {
+                e.Graphics.DrawImage(lowHealth, -lowHealth.Width / 2, -lowHealth.Height / 2);
+            }
         }
 
         /// <summary>
@@ -216,6 +258,18 @@ namespace View
             Wall wall = o as Wall;
             Image i = wallImage;
             e.Graphics.DrawImage(i, -i.Width / 2, -i.Height / 2);
+        }
+
+        private void nameDrawer(object o, PaintEventArgs e)
+        {
+            Tank t = o as Tank;
+            Point p = new Point(0, 0);
+            Point p1 = new Point(0, 0);
+
+            Brush b = Brushes.Black;
+            FontFamily fontFamily = new FontFamily("Arial");
+            Font font = new Font(fontFamily, 16, FontStyle.Bold, GraphicsUnit.Pixel);
+            e.Graphics.DrawString(t.getName() + ": " + t.getScore(), font, b, p);
         }
 
         /// <summary>
@@ -289,8 +343,14 @@ namespace View
         private void TurretDrawer(object o, PaintEventArgs e)
         {
             Tank tank = o as Tank;
-            images.TryGetValue(tank.Color() + "Turret", out Image image);
-            e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
+            if (tank.Color() != null)
+            {
+                images.TryGetValue(tank.Color() + "Turret", out Image image);
+                //e.Graphics.DrawImage(image, -image.Width / 2, -image.Height / 2);
+
+                Rectangle destinationRect = new Rectangle(-oldTurret.Width / 2, -oldTurret.Height / 2, oldTurret.Width + 30, oldTurret.Height + 30);
+                e.Graphics.DrawImage(image, destinationRect, 100, 100, image.Width, image.Height, GraphicsUnit.Pixel, new ImageAttributes(), null);
+            }
         }
 
         /// <summary>
