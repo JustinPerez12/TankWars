@@ -37,8 +37,6 @@ namespace View
             panel.Size = new Size(viewSize, viewSize);
             this.Controls.Add(panel);
 
-            //need to take this out later
-            serverAddress.Text = "localhost";
 
             FormClosed += OnExit;
 
@@ -101,13 +99,13 @@ namespace View
             }
 
             // Disable the controls and try to connect
+            controller.Connect(serverAddress.Text);
             connectButton.Enabled = false;
             serverAddress.Enabled = false;
             connectButton.Visible = false;
             serverAddress.Visible = false;
             nameLabel.Visible = false;
             serverLabel.Visible = false;
-            controller.Connect(serverAddress.Text);
             string name = nameBox.Text;
             controller.MessageEntered(name);
             nameBox.Enabled = false;
