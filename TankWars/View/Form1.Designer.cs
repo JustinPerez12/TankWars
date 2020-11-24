@@ -39,24 +39,24 @@
             // nameBox
             // 
             this.nameBox.BackColor = System.Drawing.SystemColors.Window;
-            this.nameBox.Font = new System.Drawing.Font("Bebas", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nameBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nameBox.Location = new System.Drawing.Point(198, 551);
             this.nameBox.Name = "nameBox";
-            this.nameBox.Size = new System.Drawing.Size(274, 52);
+            this.nameBox.Size = new System.Drawing.Size(274, 49);
             this.nameBox.TabIndex = 0;
             // 
             // serverAddress
             // 
-            this.serverAddress.Font = new System.Drawing.Font("Bebas", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.serverAddress.Location = new System.Drawing.Point(198, 623);
             this.serverAddress.Name = "serverAddress";
-            this.serverAddress.Size = new System.Drawing.Size(275, 52);
+            this.serverAddress.Size = new System.Drawing.Size(275, 49);
             this.serverAddress.TabIndex = 1;
             // 
             // connectButton
             // 
             this.connectButton.BackColor = System.Drawing.Color.Black;
-            this.connectButton.Font = new System.Drawing.Font("Bebas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.connectButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.connectButton.ForeColor = System.Drawing.Color.White;
             this.connectButton.Location = new System.Drawing.Point(33, 691);
             this.connectButton.Name = "connectButton";
@@ -70,11 +70,11 @@
             // 
             this.serverLabel.AutoSize = true;
             this.serverLabel.BackColor = System.Drawing.Color.Transparent;
-            this.serverLabel.Font = new System.Drawing.Font("Bebas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.serverLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.serverLabel.Location = new System.Drawing.Point(23, 617);
+            this.serverLabel.Location = new System.Drawing.Point(13, 617);
             this.serverLabel.Name = "serverLabel";
-            this.serverLabel.Size = new System.Drawing.Size(156, 58);
+            this.serverLabel.Size = new System.Drawing.Size(179, 55);
             this.serverLabel.TabIndex = 3;
             this.serverLabel.Text = "Server:";
             // 
@@ -82,11 +82,11 @@
             // 
             this.nameLabel.AutoSize = true;
             this.nameLabel.BackColor = System.Drawing.Color.Transparent;
-            this.nameLabel.Font = new System.Drawing.Font("Bebas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nameLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nameLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.nameLabel.Location = new System.Drawing.Point(52, 551);
+            this.nameLabel.Location = new System.Drawing.Point(26, 551);
             this.nameLabel.Name = "nameLabel";
-            this.nameLabel.Size = new System.Drawing.Size(127, 58);
+            this.nameLabel.Size = new System.Drawing.Size(166, 55);
             this.nameLabel.TabIndex = 4;
             this.nameLabel.Text = "Name:";
             // 
