@@ -39,24 +39,28 @@
             // nameBox
             // 
             this.nameBox.BackColor = System.Drawing.SystemColors.Window;
-            this.nameBox.Location = new System.Drawing.Point(349, 357);
+            this.nameBox.Font = new System.Drawing.Font("Bebas", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.nameBox.Location = new System.Drawing.Point(198, 551);
             this.nameBox.Name = "nameBox";
-            this.nameBox.Size = new System.Drawing.Size(100, 20);
+            this.nameBox.Size = new System.Drawing.Size(274, 52);
             this.nameBox.TabIndex = 0;
             // 
             // serverAddress
             // 
-            this.serverAddress.Location = new System.Drawing.Point(157, 356);
+            this.serverAddress.Font = new System.Drawing.Font("Bebas", 27.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.serverAddress.Location = new System.Drawing.Point(198, 623);
             this.serverAddress.Name = "serverAddress";
-            this.serverAddress.Size = new System.Drawing.Size(100, 20);
+            this.serverAddress.Size = new System.Drawing.Size(275, 52);
             this.serverAddress.TabIndex = 1;
             // 
             // connectButton
             // 
-            this.connectButton.BackColor = System.Drawing.Color.Transparent;
-            this.connectButton.Location = new System.Drawing.Point(511, 357);
+            this.connectButton.BackColor = System.Drawing.Color.Black;
+            this.connectButton.Font = new System.Drawing.Font("Bebas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.connectButton.ForeColor = System.Drawing.Color.White;
+            this.connectButton.Location = new System.Drawing.Point(33, 691);
             this.connectButton.Name = "connectButton";
-            this.connectButton.Size = new System.Drawing.Size(75, 23);
+            this.connectButton.Size = new System.Drawing.Size(440, 68);
             this.connectButton.TabIndex = 2;
             this.connectButton.Text = "Connect";
             this.connectButton.UseVisualStyleBackColor = false;
@@ -66,23 +70,25 @@
             // 
             this.serverLabel.AutoSize = true;
             this.serverLabel.BackColor = System.Drawing.Color.Transparent;
+            this.serverLabel.Font = new System.Drawing.Font("Bebas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.serverLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.serverLabel.Location = new System.Drawing.Point(93, 360);
+            this.serverLabel.Location = new System.Drawing.Point(23, 617);
             this.serverLabel.Name = "serverLabel";
-            this.serverLabel.Size = new System.Drawing.Size(38, 13);
+            this.serverLabel.Size = new System.Drawing.Size(156, 58);
             this.serverLabel.TabIndex = 3;
-            this.serverLabel.Text = "Server";
+            this.serverLabel.Text = "Server:";
             // 
             // nameLabel
             // 
             this.nameLabel.AutoSize = true;
             this.nameLabel.BackColor = System.Drawing.Color.Transparent;
+            this.nameLabel.Font = new System.Drawing.Font("Bebas", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.nameLabel.ForeColor = System.Drawing.SystemColors.ButtonFace;
-            this.nameLabel.Location = new System.Drawing.Point(297, 360);
+            this.nameLabel.Location = new System.Drawing.Point(52, 551);
             this.nameLabel.Name = "nameLabel";
-            this.nameLabel.Size = new System.Drawing.Size(35, 13);
+            this.nameLabel.Size = new System.Drawing.Size(127, 58);
             this.nameLabel.TabIndex = 4;
-            this.nameLabel.Text = "Name";
+            this.nameLabel.Text = "Name:";
             // 
             // contextMenuStrip1
             // 
