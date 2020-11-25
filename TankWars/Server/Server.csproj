@@ -8,6 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Model\Model.csproj" />
     <ProjectReference Include="..\NetworkController\NetworkController.csproj" />
+    <ProjectReference Include="..\ServerController\ServerController.csproj" />
   </ItemGroup>
 
 </Project>
