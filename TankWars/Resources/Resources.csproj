@@ -67,6 +67,7 @@
     <Content Include="Images\YellowTank.png" />
     <Content Include="Images\YellowTurret.png" />
     <Content Include="README.txt" />
+    <Content Include="Settings.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

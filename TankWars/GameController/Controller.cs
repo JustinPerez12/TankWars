@@ -245,7 +245,7 @@ namespace GameController
             else if (tank.getHP() == 0)
             {
                 theWorld.Tanks.Remove(tank.GetID());
-                if(theWorld.DeadTanks.ContainsKey(tank.GetID()))
+                if (theWorld.DeadTanks.ContainsKey(tank.GetID()))
                 {
                     theWorld.DeadTanks.Remove(tank.GetID());
                     theWorld.DeadTanks.Add(tank.GetID(), tank);

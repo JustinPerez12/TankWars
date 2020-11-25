@@ -28,6 +28,11 @@ namespace Model {
             return wallNum;
         }
 
+        public void setWallID(int ID)
+        {
+            wallNum = ID;
+        }
+
 
         public Vector2D getP1()
         {
@@ -37,6 +42,16 @@ namespace Model {
         public Vector2D getP2()
         {
             return p2;
+        }
+
+        public void SetP1(Vector2D P1)
+        {
+            p1 = P1;
+        }
+
+        public void SetP2(Vector2D P2)
+        {
+            p2 = P2;
         }
 
         /// <summary>
