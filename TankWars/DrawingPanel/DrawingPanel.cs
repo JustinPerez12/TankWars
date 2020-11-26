@@ -80,7 +80,7 @@ namespace View
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
-                    double playerX = player.GetLocation().GetX();
+                     double playerX = player.GetLocation().GetX();
                     deathLocationY = player.GetLocation().GetY();
                     deathLocationX = player.GetLocation().GetX();
                     double ratio = (double)viewSize / (double)2000;

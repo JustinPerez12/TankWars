@@ -45,6 +45,8 @@ namespace View
             panel.MouseDown += HandleMouseDown;
             panel.MouseUp += HandleMouseUp;
             panel.MouseMove += HandleMouseMove;
+            nameBox.Text = "yo";
+            serverAddress.Text = "localhost";
         }
 
         /// <summary>

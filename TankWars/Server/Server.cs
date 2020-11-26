@@ -30,10 +30,12 @@ namespace Server
                     //Console.WriteLine(MSPerFrame + "");
                 }
                 watch.Reset();
-                controller.UpdateWorld();
-                foreach (SocketState client in controller.Clients.Keys)
+                lock (controller.world)
                 {
-                    //sendMesssage(client);
+                    foreach (SocketState client in controller.Clients.Keys)
+                    {
+                        controller.sendMesssage(client);
+                    }
                 }
             }
         }
@@ -49,7 +51,6 @@ namespace Server
                 return;
 
             Console.WriteLine("client connected");
-            controller.setUpWorld(state);
             state.OnNetworkAction = ReceiveMessageFromClient;
             Console.WriteLine("sending");
             Networking.GetData(state);
@@ -63,7 +64,8 @@ namespace Server
                 controller.Clients.Remove(state);
                 return;
             }
-            controller.UpdateWorld(state.GetData());
+
+            controller.UpdateWorld(state);
             controller.sendMesssage(state);
             Networking.GetData(state);
         }
