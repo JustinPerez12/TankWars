@@ -30,6 +30,14 @@ namespace Model {
 
         }
 
+        public Projectile(int Projnum, Vector2D Location, Vector2D Direction, bool Died, int TankID)
+        {
+            projNum = Projnum;
+            location = Location;
+            direction = Direction;
+            died = Died;
+            tankID = TankID; 
+        }
         public int getProjnum()
         {
             return projNum;

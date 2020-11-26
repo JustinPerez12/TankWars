@@ -14,14 +14,14 @@ namespace View
     public class DrawingPanel : Panel
     {
         private World theWorld;
-        private Controller controller;
+        private ClientController controller;
         private int viewSize = 800;
         private int worldSize = 2000;
         private Dictionary<string, Image> images;
 
         private double deathLocationX = -1;
         private double deathLocationY = -1;
-        public DrawingPanel(World w, Controller controller1)
+        public DrawingPanel(World w, ClientController controller1)
         {
             controller = controller1;
             DoubleBuffered = true;
@@ -80,7 +80,7 @@ namespace View
                 if (theWorld.Tanks.TryGetValue(controller.getID(), out Tank player))
                 {
                     double playerY = player.GetLocation().GetY();
-                    double playerX = player.GetLocation().GetX();
+                     double playerX = player.GetLocation().GetX();
                     deathLocationY = player.GetLocation().GetY();
                     deathLocationX = player.GetLocation().GetX();
                     double ratio = (double)viewSize / (double)2000;

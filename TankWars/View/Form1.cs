@@ -17,7 +17,7 @@ namespace View
 {
     public partial class Form1 : Form
     {
-        Controller controller;
+        ClientController controller;
         DrawingPanel panel;
         World theWorld;
 
@@ -26,7 +26,7 @@ namespace View
         {
             InitializeComponent();
 
-            controller = new Controller();
+            controller = new ClientController();
             controller.InputArrived += DisplayInput;
             controller.error += ErrorEvent;
 
@@ -45,6 +45,8 @@ namespace View
             panel.MouseDown += HandleMouseDown;
             panel.MouseUp += HandleMouseUp;
             panel.MouseMove += HandleMouseMove;
+            nameBox.Text = "yo";
+            serverAddress.Text = "localhost";
         }
 
         /// <summary>

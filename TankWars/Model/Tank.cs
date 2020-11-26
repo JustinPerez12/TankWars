@@ -41,10 +41,25 @@ namespace Model
         private bool joined;
 
         private string color;
+
         public Tank()
         {
         }
 
+        public Tank(int ID1, Vector2D Location, Vector2D Orientation, Vector2D Aiming, string Name, int HP, int Score, bool Died, bool Disconnected, bool Joined)
+        {
+            ID = ID1;
+            location = Location;
+            orientation = Orientation;
+            aiming = Aiming;
+            name = Name;
+            hitPoints = HP;
+            score = Score;
+            died = Died;
+            disconnected = Disconnected;
+            joined = Joined;
+            
+        }
         public void randomColor()
         {
             List<string> colors = new List<string>() { "Blue", "Green", "Red", "Purple", "Dark", "Yellow", "Orange" };
@@ -96,9 +111,9 @@ namespace Model
             return orientation;
         }
 
-        public void SetLocation(Vector2D l)
+        public void MoveTank(Vector2D direction)
         {
-            location = l;
+            location += direction;
         }
 
         public void SetOrientation(Vector2D o)

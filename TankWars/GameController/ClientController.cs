@@ -12,7 +12,7 @@ using TankWars;
 
 namespace GameController
 {
-    public class Controller
+    public class ClientController
     {
         private World theWorld;
         private int worldSize;
@@ -41,7 +41,7 @@ namespace GameController
         //theServer to connect to
         private SocketState theServer = null;
 
-        public Controller()
+        public ClientController()
         {
             theWorld = new World(worldSize);
             moving = "none";
