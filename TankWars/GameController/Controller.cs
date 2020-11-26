@@ -141,7 +141,7 @@ namespace GameController
                 JObject obj = JObject.Parse(JSONString);
                 JToken tankValue = obj["tank"];
                 JToken wallValue = obj["wall"];
-                JToken projValue = obj["proj"];
+                JToken projValue = obj["proj"]; 
                 JToken beamValue = obj["beam"];
                 JToken powerupValue = obj["power"];
                 lock (theWorld)
