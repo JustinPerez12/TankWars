@@ -34,6 +34,7 @@ namespace Server
                 {
                     foreach (SocketState client in controller.Clients.Keys)
                     {
+                        controller.UpdateWorld(client);
                         controller.sendMesssage(client);
                     }
                 }
@@ -69,7 +70,7 @@ namespace Server
             }
 
             controller.UpdateWorld(state);
-            controller.sendMesssage(state);
+            //controller.sendMesssage(state);
             Networking.GetData(state);
         }
     }

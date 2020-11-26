@@ -8,10 +8,8 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using TankWars;
 
-namespace ServerController
-{
-    public class servController
-    {
+namespace ServerController {
+    public class servController {
         public int MSPerFrame;
         public int UniverseSize;
         public int FramesPerShot;
@@ -47,6 +45,7 @@ namespace ServerController
                 if (p[p.Length - 1] != '\n')
                     break;
                 UpdateArrived(p, state);
+                //Console.WriteLine(p);
             }
         }
 
@@ -60,21 +59,38 @@ namespace ServerController
                     JToken moving = obj["moving"];
                     JToken fire = obj["fire"];
                     JToken turretDirection = obj["tdir"];
+                    Vector2D tdir = parseTdir(turretDirection);
                     Clients.TryGetValue(state, out int TankID);
                     world.Tanks.TryGetValue(TankID, out Tank tank);
-                    Moving(moving, tank);
-                    Firing(fire, tank);
-                    /* Turret(turretDirection, tank);*/
+                    Moving(moving, tdir, tank);
+                    Firing(fire, tdir, tank);
 
                 }
                 catch (Exception)
                 {
                     string name = p.Remove(p.Length - 1, 1);
                     if (!ClientName.ContainsKey(state))
+                    {
                         ClientName.Add(state, name);
-                    setUpWorld(state);
+                        setUpWorld(state);
+                    }
                 }
             }
+        }
+
+        private Vector2D parseTdir(JToken tdir)
+        {
+            string data = tdir.ToString();
+            string[] parts = Regex.Split(data, @"(?<=[\n])");
+            foreach (string p in parts)
+            {
+                if (p.Length == 0)
+                    continue;
+                if (p[p.Length - 1] != '\n')
+                    break;
+                //Console.WriteLine(p);
+            }
+            return new Vector2D(double.Parse(parts[0]), double.Parse(parts[1]));
         }
 
         private void Turret(JToken turretDirection, Tank tank)
@@ -82,16 +98,30 @@ namespace ServerController
             throw new NotImplementedException();
         }
 
-        private void Firing(JToken fire, Tank tank)
+        private void Firing(JToken fire, Vector2D turretDirection, Tank tank)
         {
             lock (world)
             {
                 if (fire.ToString().Equals("main"))
                 {
-
-                    Projectile proj = new Projectile(projnum, tank.GetLocation(), tank.TurretOrientation(), false, tank.GetID());
-                    projnum++;
-                    world.Projectiles.Add(proj.getProjnum(), proj);
+                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj))
+                    {
+                        world.Projectiles.Remove(tank.GetID());
+                        if (proj.isDead())
+                            return;
+                        else
+                        {
+                            proj.moveProj();
+                            world.Projectiles.Add(tank.GetID(), proj);
+                        }
+                    }
+                    else
+                    {
+                        //Console.WriteLine(tank.TurretOrientation() + "");
+                        Projectile newProj = new Projectile(projnum, tank.GetLocation(), turretDirection, false, tank.GetID());
+                        projnum++;
+                        world.Projectiles.Add(tank.GetID(), newProj);
+                    }
 
                 }
                 else if (fire.ToString().Equals("alt"))
@@ -100,15 +130,26 @@ namespace ServerController
                 }
                 else if (fire.ToString().Equals("none"))
                 {
-
+                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj))
+                    {
+                        world.Projectiles.Remove(tank.GetID());
+                        if (proj.isDead())
+                            return;
+                        else
+                        {
+                            proj.moveProj();
+                            world.Projectiles.Add(tank.GetID(), proj);
+                        }
+                    }
                 }
             }
         }
 
-        private void Moving(JToken moving, Tank tank)
+        private void Moving(JToken moving, Vector2D turretDirection, Tank tank)
         {
             lock (world)
             {
+                tank.SetTurretOrientation(turretDirection.GetX(), turretDirection.GetY());
                 if (moving.ToString().Equals("up"))
                 {
                     tank.MoveTank(new Vector2D(0, -3));
@@ -162,7 +203,10 @@ namespace ServerController
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
 
                 foreach (Projectile proj in world.Projectiles.Values)
+                {
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
+                    //Console.WriteLine(JsonConvert.SerializeObject(proj));
+                }
 
                 foreach (Powerup power in world.Powerups.Values)
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(power) + "\n");

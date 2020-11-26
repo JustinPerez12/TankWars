@@ -25,6 +25,8 @@ namespace Model {
         [JsonProperty(PropertyName = "owner")]
         private int tankID;
 
+        private Vector2D velocity;
+
         public Projectile()
         {
 
@@ -37,6 +39,12 @@ namespace Model {
             direction = Direction;
             died = Died;
             tankID = TankID; 
+        }
+
+        public void moveProj()
+        {
+            velocity = direction * 25;
+            location += velocity;
         }
         public int getProjnum()
         {
