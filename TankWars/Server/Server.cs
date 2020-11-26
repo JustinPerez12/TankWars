@@ -61,7 +61,10 @@ namespace Server
             if (state.ErrorOccured)
             {
                 Console.WriteLine("client left dawg. stop simping dawg");
+                controller.Clients.TryGetValue(state, out int TankID);
                 controller.Clients.Remove(state);
+                controller.ClientName.Remove(state);
+                controller.world.Tanks.Remove(TankID);
                 return;
             }
 

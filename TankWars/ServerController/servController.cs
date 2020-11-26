@@ -46,32 +46,34 @@ namespace ServerController
                     continue;
                 if (p[p.Length - 1] != '\n')
                     break;
-                Console.WriteLine(p);
                 UpdateArrived(p, state);
             }
         }
 
         private void UpdateArrived(string p, SocketState state)
         {
-            try
+            lock (world)
             {
-                JObject obj = JObject.Parse(p);
-                JToken moving = obj["moving"];
-                JToken fire = obj["fire"];
-                JToken turretDirection = obj["tdir"];
-                Clients.TryGetValue(state, out int TankID);
-                world.Tanks.TryGetValue(TankID, out Tank tank);
-                Moving(moving, tank);
-                Firing(fire, tank);
-                /* Turret(turretDirection, tank);*/
+                try
+                {
+                    JObject obj = JObject.Parse(p);
+                    JToken moving = obj["moving"];
+                    JToken fire = obj["fire"];
+                    JToken turretDirection = obj["tdir"];
+                    Clients.TryGetValue(state, out int TankID);
+                    world.Tanks.TryGetValue(TankID, out Tank tank);
+                    Moving(moving, tank);
+                    Firing(fire, tank);
+                    /* Turret(turretDirection, tank);*/
 
-            }
-            catch (Exception)
-            {
-                string name = p.Remove(p.Length - 1, 1);
-                if (!ClientName.ContainsKey(state))
-                    ClientName.Add(state, name);
-                setUpWorld(state);
+                }
+                catch (Exception)
+                {
+                    string name = p.Remove(p.Length - 1, 1);
+                    if (!ClientName.ContainsKey(state))
+                        ClientName.Add(state, name);
+                    setUpWorld(state);
+                }
             }
         }
 
@@ -134,16 +136,18 @@ namespace ServerController
 
         public void setUpWorld(SocketState state)
         {
-            Clients.Add(state, clientID);
-            Clients.TryGetValue(state, out int ID);
-            ClientName.TryGetValue(state, out string name);
-            clientID++;
-            Networking.Send(state.TheSocket, ID + "\n");
-            Networking.Send(state.TheSocket, UniverseSize + "\n");
             lock (world)
             {
+                Clients.Add(state, clientID);
+                Clients.TryGetValue(state, out int ID);
+                ClientName.TryGetValue(state, out string name);
+                clientID++;
+                Networking.Send(state.TheSocket, ID + "\n");
+                Networking.Send(state.TheSocket, UniverseSize + "\n");
+
                 foreach (Wall wall in world.Walls.Values)
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(wall) + "\n");
+
                 Tank tank = new Tank(ID, new Vector2D(-300, -300), new Vector2D(1, 0), new Vector2D(0, 0), name, 3, 0, false, false, true);
                 world.Tanks.Add(tank.GetID(), tank);
                 Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
