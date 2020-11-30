@@ -11,6 +11,7 @@ namespace Model {
         public Dictionary<int, Beam> Beams;
         public Dictionary<int, string> playerColors;
         public Dictionary<int, Tank> DeadTanks;
+        public Dictionary<int, Projectile> DeadProj;
         public int size
         { get; private set; }
 
@@ -23,6 +24,7 @@ namespace Model {
             Beams = new Dictionary<int, Beam>();
             playerColors = new Dictionary<int, string>();
             DeadTanks = new Dictionary<int, Tank>();
+            DeadProj = new Dictionary<int, Projectile>();
             size = _size;
         }
 

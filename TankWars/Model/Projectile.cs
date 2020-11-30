@@ -10,7 +10,7 @@ namespace Model {
     public class Projectile {
 
 
-        [JsonProperty(PropertyName = "Proj")]
+        [JsonProperty(PropertyName = "proj")]
         private int projNum;
 
         [JsonProperty(PropertyName = "loc")]
@@ -27,6 +27,8 @@ namespace Model {
 
         private Vector2D velocity;
 
+        private int frames;
+
         public Projectile()
         {
 
@@ -41,10 +43,11 @@ namespace Model {
             tankID = TankID; 
         }
 
-        public void moveProj()
+        public int moveProj()
         {
             velocity = direction * 25;
             location += velocity;
+            return frames++;
         }
         public int getProjnum()
         {
@@ -86,5 +89,6 @@ namespace Model {
         {
             return tankID;
         }
+
     }
 }

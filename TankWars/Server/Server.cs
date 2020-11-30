@@ -18,16 +18,17 @@ namespace Server
 
         static void Main(string[] args)
         {
+
             controller = new servController();
             controller.ReadFile("..\\..\\..\\..\\Resources\\Settings.xml");
             StartServer();
+            Console.WriteLine("server open to recieve");
             Stopwatch watch = new Stopwatch();
             while (true)
             {
                 watch.Start();
                 while (watch.ElapsedMilliseconds < controller.MSPerFrame)
                 {
-                    //Console.WriteLine(MSPerFrame + "");
                 }
                 watch.Reset();
                 lock (controller.world)

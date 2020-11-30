@@ -138,6 +138,7 @@ namespace GameController
         {
             try
             {
+                Debug.WriteLine(JSONString);
                 JObject obj = JObject.Parse(JSONString);
                 JToken tankValue = obj["tank"];
                 JToken wallValue = obj["wall"];

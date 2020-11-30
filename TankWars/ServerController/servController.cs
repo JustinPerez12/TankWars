@@ -45,7 +45,6 @@ namespace ServerController {
                 if (p[p.Length - 1] != '\n')
                     break;
                 UpdateArrived(p, state);
-                //Console.WriteLine(p);
             }
         }
 
@@ -67,7 +66,7 @@ namespace ServerController {
 
                 }
                 catch (Exception)
-                {
+                 {
                     string name = p.Remove(p.Length - 1, 1);
                     if (!ClientName.ContainsKey(state))
                     {
@@ -82,15 +81,18 @@ namespace ServerController {
         {
             string data = tdir.ToString();
             string[] parts = Regex.Split(data, @"(?<=[\n])");
-            foreach (string p in parts)
-            {
-                if (p.Length == 0)
-                    continue;
-                if (p[p.Length - 1] != '\n')
-                    break;
-                //Console.WriteLine(p);
-            }
-            return new Vector2D(double.Parse(parts[0]), double.Parse(parts[1]));
+
+            // substring x coordinate from JToken
+            int x1 = parts[1].IndexOf(':');
+            int x2 = parts[1].IndexOf(',');
+            string x = parts[1].Substring(x1+2, x2 - x1 - 2);
+
+            //substring y coordinate from JToken
+            int y1 = parts[2].IndexOf(':');
+            int y2 = parts[2].IndexOf('\r');
+            string y = parts[2].Substring(y1+2, y2 - y1 - 2);
+
+            return new Vector2D(double.Parse(x), double.Parse(y));
         }
 
         private void Turret(JToken turretDirection, Tank tank)
@@ -111,13 +113,16 @@ namespace ServerController {
                             return;
                         else
                         {
-                            proj.moveProj();
+                            if (proj.moveProj() > MSPerFrame)
+                            {
+                                proj.Deactivate();
+                                world.DeadProj.Add(proj.getProjnum(), proj);
+                            }
                             world.Projectiles.Add(tank.GetID(), proj);
                         }
                     }
                     else
                     {
-                        //Console.WriteLine(tank.TurretOrientation() + "");
                         Projectile newProj = new Projectile(projnum, tank.GetLocation(), turretDirection, false, tank.GetID());
                         projnum++;
                         world.Projectiles.Add(tank.GetID(), newProj);
@@ -137,7 +142,8 @@ namespace ServerController {
                             return;
                         else
                         {
-                            proj.moveProj();
+                            if (proj.moveProj() > MSPerFrame)
+                                proj.Deactivate();
                             world.Projectiles.Add(tank.GetID(), proj);
                         }
                     }
@@ -199,13 +205,16 @@ namespace ServerController {
         {
             lock (world)
             {
+
                 foreach (Tank tank in world.Tanks.Values)
+                {
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
+                }
 
                 foreach (Projectile proj in world.Projectiles.Values)
                 {
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
-                    //Console.WriteLine(JsonConvert.SerializeObject(proj));
+                    Console.WriteLine(JsonConvert.SerializeObject(proj));
                 }
 
                 foreach (Powerup power in world.Powerups.Values)

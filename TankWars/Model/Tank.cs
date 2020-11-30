@@ -42,6 +42,8 @@ namespace Model
 
         private string color;
 
+        private bool canShoot;
+
         public Tank()
         {
         }
