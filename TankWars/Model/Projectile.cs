@@ -43,9 +43,9 @@ namespace Model {
             tankID = TankID; 
         }
 
-        public void moveProj()
+        public void moveProj(int ProjectileVelocity)
         {
-            velocity = direction * 25;
+            velocity = direction * ProjectileVelocity;
             location += velocity;
         }
 

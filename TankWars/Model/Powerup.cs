@@ -19,12 +19,22 @@ namespace Model {
 
         public Powerup()
         {
+        }
 
+        public Powerup(int newNum, Vector2D newLocation)
+        {
+            powerupNum = newNum;
+            location = newLocation;
+            died = false;
         }
 
         public int getPowerNum()
         {
             return powerupNum;
+        }
+        public void killPower()
+        {
+            died = true;
         }
 
         public Vector2D getLocation()

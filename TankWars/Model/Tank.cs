@@ -42,7 +42,9 @@ namespace Model
 
         private string color;
 
-        private int frames;
+        private int shotFrames;
+        private int deadFrames;
+        private bool power;
 
         public Tank()
         {
@@ -60,7 +62,9 @@ namespace Model
             died = Died;
             disconnected = Disconnected;
             joined = Joined;
-            frames = 0;
+            shotFrames = 0;
+            deadFrames = -1;
+            power = false;
         }
         public void randomColor()
         {
@@ -83,10 +87,28 @@ namespace Model
         public void Deactivate()
         {
             died = true;
+            deadFrames = 0;
         }
         public bool IsDead()
         {
             return died;
+        }
+
+        public void givePower()
+        {
+            power = true;
+        } 
+
+        public bool hasPower()
+        {
+            return power;
+        }
+
+        public void Activate()
+        {
+            died = false;
+            deadFrames = -1;
+            hitPoints = 3;
         }
         public int GetID()
         {
@@ -98,6 +120,11 @@ namespace Model
             return disconnected;
         }
 
+        public void SetDisconnect()
+        {
+            disconnected = true;
+        }
+
         public bool Joined()
         {
             return joined;
@@ -106,6 +133,16 @@ namespace Model
         public Vector2D GetLocation()
         {
             return location;
+        }
+
+        public int getDeadFrames()
+        {
+            return deadFrames;
+        }
+
+        public void addDeadFrame()
+        {
+            deadFrames++;
         }
 
         public Vector2D GetOrientation()
@@ -130,7 +167,7 @@ namespace Model
 
         public int getHP()
         {
-            return hitPoints;
+            return hitPoints; 
         }
 
         public string getName()
@@ -163,23 +200,33 @@ namespace Model
 
         public void resetFrames()
         {
-            frames = 0;
+            shotFrames = 0;
         }
 
         public int getFrames()
         {
-            return frames;
+            return shotFrames;
         }
 
         public void addFrame()
         {
-            frames++;
+            shotFrames++;
         }
 
         public int decrementHP()
         {
             hitPoints--;
             return hitPoints;
+        }
+
+        public void setLocation(Vector2D newLocation)
+        {
+            location = newLocation;
+        }
+
+        public void takePower()
+        {
+            power = false;
         }
     }
 }

@@ -14,25 +14,42 @@ namespace ServerController {
         public int UniverseSize;
         public int FramesPerShot;
         public int RespawnRate;
+        public int PowerUpRespawn;
+        public int TankVelocity;
+        public int ProjectileVelocity;
+        public int NumofPowerUps;
         public World world;
         public Dictionary<SocketState, int> Clients;
         public Dictionary<SocketState, string> ClientName;
         public int clientID;
         public int projnum;
+        public int powerNum;
+        public int beamNum;
+
         public servController()
         {
             Clients = new Dictionary<SocketState, int>();
             ClientName = new Dictionary<SocketState, string>();
             clientID = 0;
             projnum = 0;
+            powerNum = 0;
+            beamNum = 0;
             world = new World(0);
         }
 
+        /// <summary>
+        /// sets world size
+        /// </summary>
+        /// <param name="universeSize"></param>
         public void SetWorldSize(int universeSize)
         {
             world.SetWorldSize(universeSize);
         }
 
+        /// <summary>
+        /// when data arrives from clients update the world 
+        /// </summary>
+        /// <param name="state"></param>
         public void UpdateWorld(SocketState state)
         {
             string data = state.GetData();
@@ -48,6 +65,11 @@ namespace ServerController {
             }
         }
 
+        /// <summary>
+        /// Process through the commands recieved and send them to the clients 
+        /// </summary>
+        /// <param name="p"></param>
+        /// <param name="state"></param>
         private void UpdateArrived(string p, SocketState state)
         {
             lock (world)
@@ -62,8 +84,12 @@ namespace ServerController {
                     Clients.TryGetValue(state, out int TankID);
                     world.Tanks.TryGetValue(TankID, out Tank tank);
                     tank.addFrame();
-                    Moving(moving, tdir, tank);
-                    Firing(fire, tdir, tank);
+                    if (deadFrame(tank))//if tank is dead do not move or allow to fire
+                    {
+                        Moving(moving, tdir, tank);
+                        Firing(fire, tdir, tank);
+                    }
+                    loadPowerups();
                 }
                 catch (Exception)
                 {
@@ -77,6 +103,420 @@ namespace ServerController {
             }
         }
 
+        /// <summary>
+        /// sets up the world for a new client that has just connected 
+        /// </summary>
+        /// <param name="state"></param>
+        public void setUpWorld(SocketState state)
+        {
+            lock (world)
+            {
+                Clients.Add(state, clientID);
+                Clients.TryGetValue(state, out int ID);
+                ClientName.TryGetValue(state, out string name);
+                clientID++;
+                Networking.Send(state.TheSocket, ID + "\n");
+                Networking.Send(state.TheSocket, UniverseSize + "\n");
+
+                foreach (Wall wall in world.Walls.Values)
+                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(wall) + "\n");
+
+                SpawnTank(ID, name, state);
+            }
+        }
+
+        /// <summary>
+        /// sends the new updated world to all clients 
+        /// </summary>
+        /// <param name="state"></param>
+        public void sendMessage(SocketState state)
+        {
+            lock (world)
+            {
+                foreach (Tank tank in world.Tanks.Values)
+                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
+
+                foreach (Projectile proj in world.Projectiles.Values)
+                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
+
+                foreach (Powerup power in world.Powerups.Values)
+                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(power) + "\n");
+            }
+        }
+
+        /// <summary>
+        /// private helper method to move tank
+        /// </summary>
+        /// <param name="moving"></param>
+        /// <param name="turretDirection"></param>
+        /// <param name="tank"></param>
+        private void Moving(JToken moving, Vector2D turretDirection, Tank tank)
+        {
+            lock (world)
+            {
+                Vector2D direction = new Vector2D(0, 0);
+                Vector2D orientation = tank.GetOrientation();
+                tank.SetOtherTurretOrientation(turretDirection);
+                if (moving.ToString().Equals("up"))
+                {
+                    direction = new Vector2D(0, -TankVelocity);
+                    orientation = new Vector2D(0, -1);
+                }
+                else if (moving.ToString().Equals("down"))
+                {
+                    direction = new Vector2D(0, TankVelocity);
+                    orientation = new Vector2D(0, 1);
+                }
+                else if (moving.ToString().Equals("left"))
+                {
+                    direction = new Vector2D(-TankVelocity, 0);
+                    orientation = new Vector2D(-1, 0);
+                }
+                else if (moving.ToString().Equals("right"))
+                {
+                    direction = new Vector2D(TankVelocity, 0);
+                    orientation = new Vector2D(1, 0);
+                }
+                else if (moving.ToString().Equals("none"))
+                {
+                    direction = new Vector2D(0, 0);
+                }
+
+                if (collided(tank, direction))
+                    direction = new Vector2D(0, 0);
+
+                tank.MoveTank(direction);
+                tank.SetOrientation(orientation);
+            }
+        }
+
+        /// <summary>
+        /// Private helper method to determine if a tank can fire and in what direction to send the projectile or beam
+        /// </summary>
+        /// <param name="fire"></param>
+        /// <param name="turretDirection"></param>
+        /// <param name="tank"></param>
+        private void Firing(JToken fire, Vector2D turretDirection, Tank tank)
+        {
+            lock (world)
+            {
+                if (fire.ToString().Equals("main"))
+                {
+                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj)) // proj exists
+                    {
+                        world.Projectiles.Remove(tank.GetID());
+                        if (proj.isDead())
+                            return;
+                        else
+                        {
+                            if (collided(proj, new Vector2D(0,0)))
+                                SendDeadProjeciles(proj);
+                            else
+                            {
+                                proj.moveProj(ProjectileVelocity);
+                                world.Projectiles.Add(tank.GetID(), proj);
+                            }
+                        }
+                    }
+                    else // need to add proj
+                    {
+                        if (tank.getFrames() == 1)
+                        {
+                            Projectile newProj = new Projectile(projnum, tank.GetLocation(), turretDirection, false, tank.GetID());
+                            projnum++;
+                            world.Projectiles.Add(tank.GetID(), newProj);
+                        }
+                        else if (tank.getFrames() >= FramesPerShot)
+                            tank.resetFrames();
+                    }
+
+                }
+                else if (fire.ToString().Equals("alt"))
+                {
+                    if (tank.hasPower())
+                    {
+                        SendBeam(tank);
+                        tank.takePower();
+                        Console.WriteLine("shot beam");
+                    }
+                }
+                else if (fire.ToString().Equals("none"))
+                {
+                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj))
+                    {
+                        world.Projectiles.Remove(tank.GetID());
+                        if (proj.isDead())
+                            return;
+                        else
+                        {
+                            if (collided(proj, new Vector2D(0,0)))
+                                SendDeadProjeciles(proj);
+                            else
+                            {
+                                proj.moveProj(ProjectileVelocity);
+                                world.Projectiles.Add(tank.GetID(), proj);
+                            }
+                        }
+                    }
+                }
+            }//lock
+        }
+
+        private void SendBeam(Tank tank)
+        {
+            Beam beam = new Beam(beamNum, tank.GetLocation(), tank.TurretOrientation(), tank.GetID());
+            beamNum++;
+            foreach(SocketState state in Clients.Keys)
+            {
+                Networking.Send(state.TheSocket, JsonConvert.SerializeObject(beam) + "\n");
+                Console.WriteLine(JsonConvert.SerializeObject(beam));
+            }
+        }
+
+        /// <summary>
+        /// Private helper method to determine if an item collides with another item 
+        /// </summary>
+        /// <param name="o"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
+        private bool collided(Object o, Vector2D direction)
+        {
+            bool isY = false;
+            bool isX = false;
+            if (o is Tank)
+            {
+                Tank tank = o as Tank;
+                Vector2D location = tank.GetLocation();
+                location += direction;
+                foreach (Wall wall in world.Walls.Values)
+                {
+                    WallCollision(wall, location, ref isX, ref isY);
+                    if (isX && isY)
+                        return true;
+                }
+                foreach (Powerup power in world.Powerups.Values)
+                {
+                    if (power.getLocation().GetX() < location.GetX() + 30 && power.getLocation().GetX() > location.GetX() - 30 &&
+                        power.getLocation().GetY() < location.GetY() + 30 && power.getLocation().GetY() > location.GetY() - 30)
+                    {
+                        tank.givePower();
+                        power.killPower();
+                        world.Powerups.Remove(power.getPowerNum());
+                        sendDeadPowerup(power);
+                    }
+                }
+            }
+            else if (o is Projectile)
+            {
+                Projectile proj = o as Projectile;
+                Vector2D location = proj.GetLocation();
+                foreach (Wall wall in world.Walls.Values)
+                {
+                    WallCollision(wall, location, ref isX, ref isY);
+                    if (isX && isY)
+                        return true;
+                }
+                int tankID = proj.GetOwner();
+                foreach (Tank tank in world.Tanks.Values)
+                {
+                    world.Tanks.TryGetValue(tank.GetID(), out Tank currentTank);
+                    if (currentTank.GetID().Equals(tankID))
+                        continue;
+                    if (location.GetX() < tank.GetLocation().GetX() + 30 && location.GetX() > tank.GetLocation().GetX() - 30 && location.GetY()
+                        < tank.GetLocation().GetY() + 30 && location.GetY() > tank.GetLocation().GetY() - 30)
+                    {
+                        proj.Deactivate();
+
+                        if (tank.decrementHP() == 0)
+                            killTank(tank);
+
+                        return true;
+                    }
+                }
+            }
+
+            else if (o is Powerup)
+            {
+                Powerup power = o as Powerup;
+                Vector2D location = power.getLocation();
+                foreach (Wall wall in world.Walls.Values)
+                {
+                    WallCollision(wall, location, ref isX, ref isY);
+                    if (isX && isY)
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// helper method to determine if an item is going to collide with a wall
+        /// </summary>
+        /// <param name="wall"></param>
+        /// <param name="location"></param>
+        /// <param name="isX"></param>
+        /// <param name="isY"></param>
+        private void WallCollision(Wall wall, Vector2D location, ref bool isX, ref bool isY)
+        {
+            isX = false;
+            isY = false;
+            wall.numofWalls(out bool isVertical, out bool p1IsGreater);
+            if (isVertical)
+            {
+                if (location.GetX() < wall.getP1().GetX() + 55 && location.GetX() > wall.getP1().GetX() - 55) // projectile is within Y of wall
+                    isX = true;
+                if (p1IsGreater && (location.GetY() < wall.getP1().GetY() + 55 && location.GetY() > wall.getP2().GetY() - 55))
+                    isY = true;
+                if (!p1IsGreater && (location.GetY() > wall.getP1().GetY() - 55 && location.GetY() < wall.getP2().GetY() + 55))
+                    isY = true;
+            }
+            else //horizontal
+            {
+                if (location.GetY() < wall.getP1().GetY() + 55 && location.GetY() > wall.getP1().GetY() - 55) // projectile is within Y of wall
+                    isY = true;
+                if (p1IsGreater && (location.GetX() < wall.getP1().GetX() + 55 && location.GetX() > wall.getP2().GetX() - 55))
+                    isX = true;
+                if (!p1IsGreater && (location.GetX() > wall.getP1().GetX() - 55 && location.GetX() < wall.getP2().GetX() + 55))
+                    isX = true;
+            }
+        }
+
+        /// <summary>
+        /// Send the dead powerup to all clients
+        /// </summary>
+        /// <param name="power"></param>
+        private void sendDeadPowerup(Powerup power)
+        {
+            foreach (SocketState state in Clients.Keys)
+            {
+                Networking.Send(state.TheSocket, JsonConvert.SerializeObject(power) + "\n");
+            }
+        }
+
+        /// <summary>
+        /// Helper method to kill a tank
+        /// </summary>
+        /// <param name="tank"></param>
+        public void killTank(Tank tank)
+        {
+            tank.Deactivate();
+            int deadFrames = 0;
+            while (deadFrames <= RespawnRate)
+                deadFrames++;
+        }
+
+        /// <summary>
+        /// helper method to load in powerups
+        /// </summary>
+        private void loadPowerups()
+        {
+            if (world.Powerups.Count == NumofPowerUps)
+                return;
+            while (world.Powerups.Count < NumofPowerUps)
+            {
+                Powerup power = new Powerup(powerNum, new Vector2D(RandomCoordinate(), RandomCoordinate()));
+
+                while (collided(power, new Vector2D(0, 0)))
+                    power = new Powerup(powerNum, new Vector2D(RandomCoordinate(), RandomCoordinate()));
+
+                world.Powerups.Add(powerNum, power);
+                powerNum++;
+            }
+        }
+
+        /// <summary>
+        /// helper method to spawn the tank at a random location when they first connect
+        /// </summary>
+        /// <param name="ID"></param>
+        /// <param name="name"></param>
+        /// <param name="state"></param>
+        private void SpawnTank(int ID, string name, SocketState state)
+        {
+            Tank tank = new Tank(ID, new Vector2D(RandomCoordinate(), RandomCoordinate()), new Vector2D(1, 0), new Vector2D(0, 0), name, 3, 0, false, false, true);
+            while (collided(tank, new Vector2D(0, 0)))
+            {
+                tank = new Tank(ID, new Vector2D(RandomCoordinate(), RandomCoordinate()), new Vector2D(1, 0), new Vector2D(0, 0), name, 3, 0, false, false, true);
+            }
+            world.Tanks.Add(tank.GetID(), tank);
+            Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
+        }
+
+        /// <summary>
+        /// helper method to respawn the tank at a random location on the map
+        /// </summary>
+        /// <param name="tank"></param>
+        private void RespawnTank(Tank tank)
+        {
+            tank.Activate();
+            tank.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
+            while (collided(tank, new Vector2D(0, 0)))
+            {
+                tank.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
+            }
+        }
+
+        /// <summary>
+        /// helper method to send the disconnected tank to all the clients 
+        /// </summary>
+        /// <param name="tank"></param>
+        public void sendDisconnect(Tank tank)
+        {
+            foreach (SocketState state in Clients.Keys)
+            {
+
+                Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
+                Console.WriteLine("send");
+            }
+        }
+
+        /// <summary>
+        /// private helper method to create two random coordinates for a Vector2D object 
+        /// </summary>
+        /// <returns></returns>
+        private double RandomCoordinate()
+        {
+            Random random = new Random();
+            double i = random.Next(-world.size / 2, world.size / 2);
+            return i;
+        }
+
+        /// <summary>
+        /// private helper method to send dead projectiles to all the clients 
+        /// </summary>
+        /// <param name="proj"></param>
+        private void SendDeadProjeciles(Projectile proj)
+        {
+            proj.Deactivate();
+            foreach (SocketState state in Clients.Keys)
+            {
+                Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
+            }
+        }
+
+        /// <summary>
+        /// private helper method to determine whether or not a tank is allowed to respawn yet 
+        /// </summary>
+        /// <param name="tank"></param>
+        /// <returns></returns>
+        private bool deadFrame(Tank tank)
+        {
+            if (tank.getDeadFrames() > -1 && tank.getDeadFrames() < RespawnRate)
+            {
+                tank.addDeadFrame();
+                return false;
+            }
+            if (tank.getDeadFrames() == RespawnRate)
+            {
+                RespawnTank(tank);
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// private helper method to parse the turrets direction
+        /// </summary>
+        /// <param name="tdir"></param>
+        /// <returns></returns>
         private Vector2D parseTdir(JToken tdir)
         {
             string data = tdir.ToString();
@@ -95,216 +535,50 @@ namespace ServerController {
             return new Vector2D(double.Parse(x), double.Parse(y));
         }
 
-        private void Firing(JToken fire, Vector2D turretDirection, Tank tank)
+        /// <summary>
+        /// Determines if a ray interescts a circle
+        /// </summary>
+        /// <param name="rayOrig">The origin of the ray</param>
+        /// <param name="rayDir">The direction of the ray</param>
+        /// <param name="center">The center of the circle</param>
+        /// <param name="r">The radius of the circle</param>
+        /// <returns></returns>
+        public static bool Intersects(Vector2D rayOrig, Vector2D rayDir, Vector2D center, double r)
         {
-            lock (world)
-            {
-                if (fire.ToString().Equals("main"))
-                {
-                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj)) // proj exists
-                    {
-                        world.Projectiles.Remove(tank.GetID());
-                        if (proj.isDead())
-                            return;
-                        else
-                        {
-                            if (collided(proj))
-                            {
-                                proj.Deactivate();
-                                world.DeadProj.Add(proj.getProjnum(), proj);
-                            }
-                            else
-                            {
-                                proj.moveProj();
-                                world.Projectiles.Add(tank.GetID(), proj);
-                            }
-                        }
-                    }
-                    else // need to add proj
-                    {
-                        if (tank.getFrames() == 1)
-                        {
-                            Projectile newProj = new Projectile(projnum, tank.GetLocation(), turretDirection, false, tank.GetID());
-                            projnum++;
-                            world.Projectiles.Add(tank.GetID(), newProj);
-                        }
-                        else if (tank.getFrames() >= FramesPerShot)
-                        {
-                            tank.resetFrames();
-                        }
+            // ray-circle intersection test
+            // P: hit point
+            // ray: P = O + tV
+            // circle: (P-C)dot(P-C)-r^2 = 0
+            // substituting to solve for t gives a quadratic equation:
+            // a = VdotV
+            // b = 2(O-C)dotV
+            // c = (O-C)dot(O-C)-r^2
+            // if the discriminant is negative, miss (no solution for P)
+            // otherwise, if both roots are positive, hit
 
-                    }
+            double a = rayDir.Dot(rayDir);
+            double b = ((rayOrig - center) * 2.0).Dot(rayDir);
+            double c = (rayOrig - center).Dot(rayOrig - center) - r * r;
 
-                }
-                else if (fire.ToString().Equals("alt"))
-                {
+            // discriminant
+            double disc = b * b - 4.0 * a * c;
 
-                }
-                else if (fire.ToString().Equals("none"))
-                {
-                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj))
-                    {
-                        world.Projectiles.Remove(tank.GetID());
-                        if (proj.isDead())
-                            return;
-                        else
-                        {
-                            if (collided(proj))
-                            {
-                                proj.Deactivate();
-                                world.DeadProj.Add(proj.getProjnum(), proj);
-                            }
-                            else
-                            {
-                                proj.moveProj();
-                                world.Projectiles.Add(tank.GetID(), proj);
-                            }
-                        }
-                    }
-                }
-            }
+            if (disc < 0.0)
+                return false;
+
+            // find the signs of the roots
+            // technically we should also divide by 2a
+            // but all we care about is the sign, not the magnitude
+            double root1 = -b + Math.Sqrt(disc);
+            double root2 = -b - Math.Sqrt(disc);
+
+            return (root1 > 0.0 && root2 > 0.0);
         }
 
-        private bool collided(Object o)
-        {
-            bool isY = false;
-            bool isX = false;
-            if (o is Tank)
-            {
-
-            }
-            else if (o is Projectile)
-            {
-                Projectile proj = o as Projectile;
-                Vector2D location = proj.GetLocation();
-                foreach (Wall wall in world.Walls.Values)
-                {
-                    wall.numofWalls(out bool isVertical, out bool p1IsGreater);
-                    if (isVertical)
-                    {
-                        if (location.GetX() < wall.getP1().GetX() + 25 && location.GetX() > wall.getP1().GetX() - 25) // projectile is within Y of wall
-                            isX = true;
-                        if (p1IsGreater && (location.GetY() < wall.getP1().GetY() + 25 && location.GetY() > wall.getP2().GetY() - 25))
-                            isY = true;
-                        if (!p1IsGreater && (location.GetY() > wall.getP1().GetY() - 25 && location.GetY() < wall.getP2().GetY() + 25))
-                            isY = true;
-                    }
-                    else //horizontal
-                    {
-                        if (location.GetY() < wall.getP1().GetY() + 25 && location.GetY() > wall.getP1().GetY() - 25) // projectile is within Y of wall
-                            isY = true;
-                        if (p1IsGreater && (location.GetX() < wall.getP1().GetX() + 25 && location.GetX() > wall.getP2().GetX() - 25))
-                            isX = true;
-                        if (!p1IsGreater && (location.GetX() > wall.getP1().GetX() - 25 && location.GetX() < wall.getP2().GetX() + 25))
-                            isX = true;
-                    }
-                    if (isX && isY)
-                        return true;
-
-                    isX = false;
-                    isY = false;
-                }
-                int tankID = proj.GetOwner();
-                foreach (Tank tank in world.Tanks.Values)
-                {
-                    world.Tanks.TryGetValue(tank.GetID(), out Tank currentTank);
-                    if (currentTank.GetID().Equals(tankID))
-                        continue;
-                    if (location.GetX() < tank.GetLocation().GetX() + 30 && location.GetX() > tank.GetLocation().GetX() - 30 && location.GetY()
-                        < tank.GetLocation().GetY() + 30 && location.GetY() > tank.GetLocation().GetY() - 30)
-                    {
-                        proj.Deactivate();
-                        world.DeadProj.Add(proj.getProjnum(), proj);
-                        if(tank.decrementHP() == 0)
-                        {
-                            tank.Deactivate();
-                        }
-                        return true;
-                    }
-
-                }
-            }
-            return false;
-        }
-
-        private void Moving(JToken moving, Vector2D turretDirection, Tank tank)
-        {
-            lock (world)
-            {
-                tank.SetOtherTurretOrientation(turretDirection);
-                if (moving.ToString().Equals("up"))
-                {
-                    tank.MoveTank(new Vector2D(0, -3));
-                    tank.SetOrientation(new Vector2D(0, -1));
-                }
-                else if (moving.ToString().Equals("down"))
-                {
-                    tank.MoveTank(new Vector2D(0, 3));
-                    tank.SetOrientation(new Vector2D(0, 1));
-                }
-                else if (moving.ToString().Equals("left"))
-                {
-                    tank.MoveTank(new Vector2D(-3, 0));
-                    tank.SetOrientation(new Vector2D(-1, 0));
-                }
-                else if (moving.ToString().Equals("right"))
-                {
-                    tank.MoveTank(new Vector2D(3, 0));
-                    tank.SetOrientation(new Vector2D(1, 0));
-                }
-                else if (moving.ToString().Equals("none"))
-                    tank.MoveTank(new Vector2D(0, 0));
-            }
-        }
-
-        public void setUpWorld(SocketState state)
-        {
-            lock (world)
-            {
-                Clients.Add(state, clientID);
-                Clients.TryGetValue(state, out int ID);
-                ClientName.TryGetValue(state, out string name);
-                clientID++;
-                Networking.Send(state.TheSocket, ID + "\n");
-                Networking.Send(state.TheSocket, UniverseSize + "\n");
-
-                foreach (Wall wall in world.Walls.Values)
-                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(wall) + "\n");
-
-                Tank tank = new Tank(ID, new Vector2D(-300, -300), new Vector2D(1, 0), new Vector2D(0, 0), name, 3, 0, false, false, true);
-                world.Tanks.Add(tank.GetID(), tank);
-                Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
-            }
-        }
-
-        public void sendMessage(SocketState state)
-        {
-            lock (world)
-            {
-
-                foreach (Tank tank in world.Tanks.Values)
-                {
-                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
-                }
-
-                foreach (Projectile proj in world.Projectiles.Values)
-                {
-                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
-
-                    Console.WriteLine(JsonConvert.SerializeObject(proj));
-                }
-
-                foreach (Projectile proj in world.DeadProj.Values)
-                {
-                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
-                }
-
-
-                foreach (Powerup power in world.Powerups.Values)
-                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(power) + "\n");
-            }
-        }
-
+        /// <summary>
+        /// Read the settings file and collect all the data necessary
+        /// </summary>
+        /// <param name="path"></param>
         public void ReadFile(string path)
         {
             using (XmlReader reader = XmlReader.Create(path))
@@ -341,6 +615,26 @@ namespace ServerController {
                             case "RespawnRate":
                                 reader.Read();
                                 RespawnRate = int.Parse(reader.Value);
+                                break;
+
+                            case "PowerUpRespawn":
+                                reader.Read();
+                                PowerUpRespawn = int.Parse(reader.Value);
+                                break;
+
+                            case "TankVelocity":
+                                reader.Read();
+                                TankVelocity = int.Parse(reader.Value);
+                                break;
+
+                            case "ProjectileVelocity":
+                                reader.Read();
+                                ProjectileVelocity = int.Parse(reader.Value);
+                                break;
+
+                            case "NumofPowerUps":
+                                reader.Read();
+                                NumofPowerUps = int.Parse(reader.Value);
                                 break;
 
                             case "Wall":

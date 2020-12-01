@@ -6,7 +6,7 @@ using TankWars;
 
 namespace Model
 {
-
+    [JsonObject(MemberSerialization.OptIn)]
     public class Beam
     {
         [JsonProperty(PropertyName = "beam")]
@@ -26,7 +26,14 @@ namespace Model
 
         public Beam()
         {
-            isDead = false;
+        }
+
+        public Beam(int bID, Vector2D og, Vector2D dir, int ID)
+        {
+            beamID = bID;
+            origin = og;
+            direction = dir;
+            owner = ID;
         }
 
         public Vector2D getOrigin()

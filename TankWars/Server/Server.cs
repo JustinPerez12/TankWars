@@ -29,6 +29,7 @@ namespace Server
                 watch.Start();
                 while (watch.ElapsedMilliseconds < controller.MSPerFrame)
                 {
+                    
                 }
                 watch.Reset();
                 lock (controller.world)
@@ -38,16 +39,22 @@ namespace Server
                         controller.UpdateWorld(client);
                         controller.sendMessage(client);
                     }
-                    controller.world.DeadProj.Clear();
                 }
             }
         }
 
+        /// <summary>
+        /// starts the server on the specified port 
+        /// </summary>
         private static void StartServer()
         {
             Networking.StartServer(OnStart, 11000);
         }
 
+        /// <summary>
+        /// This method is invoked everytime a new client connects 
+        /// </summary>
+        /// <param name="state"></param>
         private static void OnStart(SocketState state)
         {
             if (state.ErrorOccured)
@@ -59,22 +66,41 @@ namespace Server
             Networking.GetData(state);
         }
 
+        /// <summary>
+        /// This method gets invoked everytime the server recieves a command from a client 
+        /// </summary>
+        /// <param name="state"></param>
         private static void ReceiveMessageFromClient(SocketState state)
         {
             if (state.ErrorOccured)
             {
-                Console.WriteLine("client left dawg. stop simping dawg");
-                controller.Clients.TryGetValue(state, out int TankID);
-                controller.Clients.Remove(state);
-                controller.ClientName.Remove(state);
-                controller.world.Tanks.Remove(TankID);
+                PlayerDisconnected(state);
                 return;
             }
-            if(!controller.Clients.ContainsKey(state))
+
+            if(!controller.Clients.ContainsKey(state))//make sure hits once per client
                 controller.UpdateWorld(state);
-            //controller.sendMesssage(state);
             Networking.GetData(state);
         }
+
+        /// <summary>
+        /// private helper method to tell all clients that player has left the game 
+        /// </summary>
+        /// <param name="state"></param>
+        private static void PlayerDisconnected(SocketState state)
+        {
+            controller.Clients.TryGetValue(state, out int TankID);
+            controller.world.Tanks.TryGetValue(TankID, out Tank tank);
+            tank.SetDisconnect();
+            controller.Clients.Remove(state);
+            controller.ClientName.Remove(state);
+            controller.world.Tanks.Remove(TankID);
+            controller.world.DisconnectedTanks.Add(TankID, tank);
+            controller.sendDisconnect(tank);
+
+        }
+
+        
     }
 }
 
