@@ -35,9 +35,10 @@ namespace Server
                 {
                     foreach (SocketState client in controller.Clients.Keys)
                     {
-                        //controller.UpdateWorld(client);
+                        controller.UpdateWorld(client);
                         controller.sendMessage(client);
                     }
+                    controller.world.DeadProj.Clear();
                 }
             }
         }
@@ -69,8 +70,8 @@ namespace Server
                 controller.world.Tanks.Remove(TankID);
                 return;
             }
-
-            controller.UpdateWorld(state);
+            if(!controller.Clients.ContainsKey(state))
+                controller.UpdateWorld(state);
             //controller.sendMesssage(state);
             Networking.GetData(state);
         }

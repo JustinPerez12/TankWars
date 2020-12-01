@@ -156,6 +156,11 @@ namespace Model
             aiming.Normalize();
         }
 
+        public void SetOtherTurretOrientation(Vector2D orientation)
+        {
+            aiming = orientation;
+        }
+
         public void resetFrames()
         {
             frames = 0;
@@ -169,6 +174,12 @@ namespace Model
         public void addFrame()
         {
             frames++;
+        }
+
+        public int decrementHP()
+        {
+            hitPoints--;
+            return hitPoints;
         }
     }
 }

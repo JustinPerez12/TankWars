@@ -64,7 +64,6 @@ namespace ServerController {
                     tank.addFrame();
                     Moving(moving, tdir, tank);
                     Firing(fire, tdir, tank);
-
                 }
                 catch (Exception)
                 {
@@ -94,11 +93,6 @@ namespace ServerController {
             string y = parts[2].Substring(y1 + 2, y2 - y1 - 2);
 
             return new Vector2D(double.Parse(x), double.Parse(y));
-        }
-
-        private void Turret(JToken turretDirection, Tank tank)
-        {
-            throw new NotImplementedException();
         }
 
         private void Firing(JToken fire, Vector2D turretDirection, Tank tank)
@@ -189,32 +183,20 @@ namespace ServerController {
                     if (isVertical)
                     {
                         if (location.GetX() < wall.getP1().GetX() + 25 && location.GetX() > wall.getP1().GetX() - 25) // projectile is within Y of wall
-                        {
                             isX = true;
-                        }
                         if (p1IsGreater && (location.GetY() < wall.getP1().GetY() + 25 && location.GetY() > wall.getP2().GetY() - 25))
-                        {
                             isY = true;
-                        }
                         if (!p1IsGreater && (location.GetY() > wall.getP1().GetY() - 25 && location.GetY() < wall.getP2().GetY() + 25))
-                        {
                             isY = true;
-                        }
                     }
                     else //horizontal
                     {
                         if (location.GetY() < wall.getP1().GetY() + 25 && location.GetY() > wall.getP1().GetY() - 25) // projectile is within Y of wall
-                        {
                             isY = true;
-                        }
                         if (p1IsGreater && (location.GetX() < wall.getP1().GetX() + 25 && location.GetX() > wall.getP2().GetX() - 25))
-                        {
                             isX = true;
-                        }
                         if (!p1IsGreater && (location.GetX() > wall.getP1().GetX() - 25 && location.GetX() < wall.getP2().GetX() + 25))
-                        {
                             isX = true;
-                        }
                     }
                     if (isX && isY)
                         return true;
@@ -222,8 +204,23 @@ namespace ServerController {
                     isX = false;
                     isY = false;
                 }
+                int tankID = proj.GetOwner();
                 foreach (Tank tank in world.Tanks.Values)
                 {
+                    world.Tanks.TryGetValue(tank.GetID(), out Tank currentTank);
+                    if (currentTank.GetID().Equals(tankID))
+                        continue;
+                    if (location.GetX() < tank.GetLocation().GetX() + 30 && location.GetX() > tank.GetLocation().GetX() - 30 && location.GetY()
+                        < tank.GetLocation().GetY() + 30 && location.GetY() > tank.GetLocation().GetY() - 30)
+                    {
+                        proj.Deactivate();
+                        world.DeadProj.Add(proj.getProjnum(), proj);
+                        if(tank.decrementHP() == 0)
+                        {
+                            tank.Deactivate();
+                        }
+                        return true;
+                    }
 
                 }
             }
@@ -234,7 +231,7 @@ namespace ServerController {
         {
             lock (world)
             {
-                tank.SetTurretOrientation(turretDirection.GetX(), turretDirection.GetY());
+                tank.SetOtherTurretOrientation(turretDirection);
                 if (moving.ToString().Equals("up"))
                 {
                     tank.MoveTank(new Vector2D(0, -3));
@@ -293,15 +290,15 @@ namespace ServerController {
                 foreach (Projectile proj in world.Projectiles.Values)
                 {
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
+
                     Console.WriteLine(JsonConvert.SerializeObject(proj));
                 }
 
-                foreach(Projectile proj in world.DeadProj.Values)
+                foreach (Projectile proj in world.DeadProj.Values)
                 {
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
-                    Console.WriteLine("once");
                 }
-                world.DeadProj.Clear();
+
 
                 foreach (Powerup power in world.Powerups.Values)
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(power) + "\n");
