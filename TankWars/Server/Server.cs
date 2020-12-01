@@ -35,8 +35,8 @@ namespace Server
                 {
                     foreach (SocketState client in controller.Clients.Keys)
                     {
-                        controller.UpdateWorld(client);
-                        controller.sendMesssage(client);
+                        //controller.UpdateWorld(client);
+                        controller.sendMessage(client);
                     }
                 }
             }

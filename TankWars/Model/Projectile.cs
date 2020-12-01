@@ -31,11 +31,11 @@ namespace Model {
 
         public Projectile()
         {
-
         }
 
         public Projectile(int Projnum, Vector2D Location, Vector2D Direction, bool Died, int TankID)
         {
+            frames = 0;
             projNum = Projnum;
             location = Location;
             direction = Direction;
@@ -43,10 +43,14 @@ namespace Model {
             tankID = TankID; 
         }
 
-        public int moveProj()
+        public void moveProj()
         {
             velocity = direction * 25;
             location += velocity;
+        }
+
+        public int getFrames()
+        {
             return frames++;
         }
         public int getProjnum()

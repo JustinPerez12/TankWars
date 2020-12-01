@@ -61,12 +61,13 @@ namespace ServerController {
                     Vector2D tdir = parseTdir(turretDirection);
                     Clients.TryGetValue(state, out int TankID);
                     world.Tanks.TryGetValue(TankID, out Tank tank);
+                    tank.addFrame();
                     Moving(moving, tdir, tank);
                     Firing(fire, tdir, tank);
 
                 }
                 catch (Exception)
-                 {
+                {
                     string name = p.Remove(p.Length - 1, 1);
                     if (!ClientName.ContainsKey(state))
                     {
@@ -85,12 +86,12 @@ namespace ServerController {
             // substring x coordinate from JToken
             int x1 = parts[1].IndexOf(':');
             int x2 = parts[1].IndexOf(',');
-            string x = parts[1].Substring(x1+2, x2 - x1 - 2);
+            string x = parts[1].Substring(x1 + 2, x2 - x1 - 2);
 
             //substring y coordinate from JToken
             int y1 = parts[2].IndexOf(':');
             int y2 = parts[2].IndexOf('\r');
-            string y = parts[2].Substring(y1+2, y2 - y1 - 2);
+            string y = parts[2].Substring(y1 + 2, y2 - y1 - 2);
 
             return new Vector2D(double.Parse(x), double.Parse(y));
         }
@@ -106,26 +107,38 @@ namespace ServerController {
             {
                 if (fire.ToString().Equals("main"))
                 {
-                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj))
+                    if (world.Projectiles.TryGetValue(tank.GetID(), out Projectile proj)) // proj exists
                     {
                         world.Projectiles.Remove(tank.GetID());
                         if (proj.isDead())
                             return;
                         else
                         {
-                            if (proj.moveProj() > MSPerFrame)
+                            if (collided(proj))
                             {
                                 proj.Deactivate();
                                 world.DeadProj.Add(proj.getProjnum(), proj);
                             }
-                            world.Projectiles.Add(tank.GetID(), proj);
+                            else
+                            {
+                                proj.moveProj();
+                                world.Projectiles.Add(tank.GetID(), proj);
+                            }
                         }
                     }
-                    else
+                    else // need to add proj
                     {
-                        Projectile newProj = new Projectile(projnum, tank.GetLocation(), turretDirection, false, tank.GetID());
-                        projnum++;
-                        world.Projectiles.Add(tank.GetID(), newProj);
+                        if (tank.getFrames() == 1)
+                        {
+                            Projectile newProj = new Projectile(projnum, tank.GetLocation(), turretDirection, false, tank.GetID());
+                            projnum++;
+                            world.Projectiles.Add(tank.GetID(), newProj);
+                        }
+                        else if (tank.getFrames() >= FramesPerShot)
+                        {
+                            tank.resetFrames();
+                        }
+
                     }
 
                 }
@@ -142,13 +155,79 @@ namespace ServerController {
                             return;
                         else
                         {
-                            if (proj.moveProj() > MSPerFrame)
+                            if (collided(proj))
+                            {
                                 proj.Deactivate();
-                            world.Projectiles.Add(tank.GetID(), proj);
+                                world.DeadProj.Add(proj.getProjnum(), proj);
+                            }
+                            else
+                            {
+                                proj.moveProj();
+                                world.Projectiles.Add(tank.GetID(), proj);
+                            }
                         }
                     }
                 }
             }
+        }
+
+        private bool collided(Object o)
+        {
+            bool isY = false;
+            bool isX = false;
+            if (o is Tank)
+            {
+
+            }
+            else if (o is Projectile)
+            {
+                Projectile proj = o as Projectile;
+                Vector2D location = proj.GetLocation();
+                foreach (Wall wall in world.Walls.Values)
+                {
+                    wall.numofWalls(out bool isVertical, out bool p1IsGreater);
+                    if (isVertical)
+                    {
+                        if (location.GetX() < wall.getP1().GetX() + 25 && location.GetX() > wall.getP1().GetX() - 25) // projectile is within Y of wall
+                        {
+                            isX = true;
+                        }
+                        if (p1IsGreater && (location.GetY() < wall.getP1().GetY() + 25 && location.GetY() > wall.getP2().GetY() - 25))
+                        {
+                            isY = true;
+                        }
+                        if (!p1IsGreater && (location.GetY() > wall.getP1().GetY() - 25 && location.GetY() < wall.getP2().GetY() + 25))
+                        {
+                            isY = true;
+                        }
+                    }
+                    else //horizontal
+                    {
+                        if (location.GetY() < wall.getP1().GetY() + 25 && location.GetY() > wall.getP1().GetY() - 25) // projectile is within Y of wall
+                        {
+                            isY = true;
+                        }
+                        if (p1IsGreater && (location.GetX() < wall.getP1().GetX() + 25 && location.GetX() > wall.getP2().GetX() - 25))
+                        {
+                            isX = true;
+                        }
+                        if (!p1IsGreater && (location.GetX() > wall.getP1().GetX() - 25 && location.GetX() < wall.getP2().GetX() + 25))
+                        {
+                            isX = true;
+                        }
+                    }
+                    if (isX && isY)
+                        return true;
+
+                    isX = false;
+                    isY = false;
+                }
+                foreach (Tank tank in world.Tanks.Values)
+                {
+
+                }
+            }
+            return false;
         }
 
         private void Moving(JToken moving, Vector2D turretDirection, Tank tank)
@@ -201,7 +280,7 @@ namespace ServerController {
             }
         }
 
-        public void sendMesssage(SocketState state)
+        public void sendMessage(SocketState state)
         {
             lock (world)
             {
@@ -216,6 +295,13 @@ namespace ServerController {
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
                     Console.WriteLine(JsonConvert.SerializeObject(proj));
                 }
+
+                foreach(Projectile proj in world.DeadProj.Values)
+                {
+                    Networking.Send(state.TheSocket, JsonConvert.SerializeObject(proj) + "\n");
+                    Console.WriteLine("once");
+                }
+                world.DeadProj.Clear();
 
                 foreach (Powerup power in world.Powerups.Values)
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(power) + "\n");

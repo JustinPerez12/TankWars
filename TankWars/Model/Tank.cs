@@ -42,7 +42,7 @@ namespace Model
 
         private string color;
 
-        private bool canShoot;
+        private int frames;
 
         public Tank()
         {
@@ -60,7 +60,7 @@ namespace Model
             died = Died;
             disconnected = Disconnected;
             joined = Joined;
-            
+            frames = 0;
         }
         public void randomColor()
         {
@@ -154,6 +154,21 @@ namespace Model
             y -= 400;
             aiming = new Vector2D(x, y);
             aiming.Normalize();
+        }
+
+        public void resetFrames()
+        {
+            frames = 0;
+        }
+
+        public int getFrames()
+        {
+            return frames;
+        }
+
+        public void addFrame()
+        {
+            frames++;
         }
     }
 }
