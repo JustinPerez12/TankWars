@@ -31,7 +31,7 @@ namespace Server
                 {
                     
                 }
-                watch.Reset();
+                watch.Restart();
                 lock (controller.world)
                 {
                     foreach (SocketState client in controller.Clients.Keys)
@@ -92,11 +92,10 @@ namespace Server
             controller.Clients.TryGetValue(state, out int TankID);
             controller.world.Tanks.TryGetValue(TankID, out Tank tank);
             tank.SetDisconnect();
-            controller.Clients.Remove(state);
             controller.ClientName.Remove(state);
             controller.world.Tanks.Remove(TankID);
-            controller.world.DisconnectedTanks.Add(TankID, tank);
             controller.sendDisconnect(tank);
+            controller.Clients.Remove(state);
 
         }
 

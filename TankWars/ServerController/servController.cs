@@ -235,7 +235,7 @@ namespace ServerController {
                 {
                     if (tank.hasPower())
                     {
-                        SendBeam(tank);
+                        SendBeam(tank, turretDirection);
                         tank.takePower();
                         Console.WriteLine("shot beam");
                     }
@@ -262,9 +262,9 @@ namespace ServerController {
             }//lock
         }
 
-        private void SendBeam(Tank tank)
+        private void SendBeam(Tank tank, Vector2D turretDirection)
         {
-            Beam beam = new Beam(beamNum, tank.GetLocation(), tank.TurretOrientation(), tank.GetID());
+            Beam beam = new Beam(beamNum, tank.GetLocation(), turretDirection, tank.GetID());
             beamNum++;
             foreach(SocketState state in Clients.Keys)
             {
@@ -463,9 +463,8 @@ namespace ServerController {
         {
             foreach (SocketState state in Clients.Keys)
             {
-
                 Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
-                Console.WriteLine("send");
+                Console.WriteLine("disconnected");
             }
         }
 

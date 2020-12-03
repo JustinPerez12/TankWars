@@ -318,6 +318,7 @@ namespace View
             Point p1 = new Point(0, -worldSize * 2);
             Point p2 = new Point(0, 0);
             e.Graphics.DrawLine(pen, p1, p2);
+            Debug.WriteLine(p1.ToString());
         }
 
         /// <summary>
