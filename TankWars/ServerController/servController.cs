@@ -18,6 +18,8 @@ namespace ServerController {
         public int TankVelocity;
         public int ProjectileVelocity;
         public int NumofPowerUps;
+        public int PowerUpDelay;
+        public bool Gamemode;
         public World world;
         public Dictionary<SocketState, int> Clients;
         public Dictionary<SocketState, string> ClientName;
@@ -72,33 +74,30 @@ namespace ServerController {
         /// <param name="state"></param>
         private void UpdateArrived(string p, SocketState state)
         {
-            lock (world)
+            try
             {
-                try
+                JObject obj = JObject.Parse(p);
+                JToken moving = obj["moving"];
+                JToken fire = obj["fire"];
+                JToken turretDirection = obj["tdir"];
+                Vector2D tdir = parseTdir(turretDirection);
+                Clients.TryGetValue(state, out int TankID);
+                world.Tanks.TryGetValue(TankID, out Tank tank);
+                tank.addFrame();
+                if (deadFrame(tank))//if tank is dead do not move or allow to fire
                 {
-                    JObject obj = JObject.Parse(p);
-                    JToken moving = obj["moving"];
-                    JToken fire = obj["fire"];
-                    JToken turretDirection = obj["tdir"];
-                    Vector2D tdir = parseTdir(turretDirection);
-                    Clients.TryGetValue(state, out int TankID);
-                    world.Tanks.TryGetValue(TankID, out Tank tank);
-                    tank.addFrame();
-                    if (deadFrame(tank))//if tank is dead do not move or allow to fire
-                    {
-                        Moving(moving, tdir, tank);
-                        Firing(fire, tdir, tank);
-                    }
-                    loadPowerups();
+                    Moving(moving, tdir, tank);
+                    Firing(fire, tdir, tank);
                 }
-                catch (Exception)
+                loadPowerups();
+            }
+            catch (Exception)
+            {
+                string name = p.Remove(p.Length - 1, 1);
+                if (!ClientName.ContainsKey(state))
                 {
-                    string name = p.Remove(p.Length - 1, 1);
-                    if (!ClientName.ContainsKey(state))
-                    {
-                        ClientName.Add(state, name);
-                        setUpWorld(state);
-                    }
+                    ClientName.Add(state, name);
+                    setUpWorld(state);
                 }
             }
         }
@@ -120,6 +119,15 @@ namespace ServerController {
 
                 foreach (Wall wall in world.Walls.Values)
                     Networking.Send(state.TheSocket, JsonConvert.SerializeObject(wall) + "\n");
+
+                while (world.Powerups.Count < NumofPowerUps)
+                {
+                    Powerup power = new Powerup(powerNum, new Vector2D(RandomCoordinate(), RandomCoordinate()));
+                    world.Powerups.Add(powerNum, power);
+                    while (collided(power, new Vector2D(0, 0)))
+                        power.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
+                    powerNum++;
+                }
 
                 SpawnTank(ID, name, state);
             }
@@ -209,7 +217,7 @@ namespace ServerController {
                             return;
                         else
                         {
-                            if (collided(proj, new Vector2D(0,0)))
+                            if (collided(proj, new Vector2D(0, 0)))
                                 SendDeadProjeciles(proj);
                             else
                             {
@@ -238,6 +246,14 @@ namespace ServerController {
                         SendBeam(tank, turretDirection);
                         tank.takePower();
                         Console.WriteLine("shot beam");
+                        foreach (Tank t in world.Tanks.Values)
+                        {
+                            if (Intersects(tank.GetLocation(), turretDirection, t.GetLocation(), 30))
+                            {
+                                t.Deactivate();
+                                tank.incrementScore();
+                            }
+                        }
                     }
                 }
                 else if (fire.ToString().Equals("none"))
@@ -249,7 +265,7 @@ namespace ServerController {
                             return;
                         else
                         {
-                            if (collided(proj, new Vector2D(0,0)))
+                            if (collided(proj, new Vector2D(0, 0)))
                                 SendDeadProjeciles(proj);
                             else
                             {
@@ -266,7 +282,7 @@ namespace ServerController {
         {
             Beam beam = new Beam(beamNum, tank.GetLocation(), turretDirection, tank.GetID());
             beamNum++;
-            foreach(SocketState state in Clients.Keys)
+            foreach (SocketState state in Clients.Keys)
             {
                 Networking.Send(state.TheSocket, JsonConvert.SerializeObject(beam) + "\n");
                 Console.WriteLine(JsonConvert.SerializeObject(beam));
@@ -296,13 +312,15 @@ namespace ServerController {
                 }
                 foreach (Powerup power in world.Powerups.Values)
                 {
+                    if (tank.hasPower())
+                        return false;
                     if (power.getLocation().GetX() < location.GetX() + 30 && power.getLocation().GetX() > location.GetX() - 30 &&
                         power.getLocation().GetY() < location.GetY() + 30 && power.getLocation().GetY() > location.GetY() - 30)
                     {
                         tank.givePower();
                         power.killPower();
-                        world.Powerups.Remove(power.getPowerNum());
                         sendDeadPowerup(power);
+                        power.resetPowerFrame();
                     }
                 }
             }
@@ -328,8 +346,11 @@ namespace ServerController {
                         proj.Deactivate();
 
                         if (tank.decrementHP() == 0)
+                        {
                             killTank(tank);
-
+                            world.Tanks.TryGetValue(tankID, out Tank shooter);
+                            shooter.incrementScore();
+                        }
                         return true;
                     }
                 }
@@ -410,17 +431,20 @@ namespace ServerController {
         /// </summary>
         private void loadPowerups()
         {
-            if (world.Powerups.Count == NumofPowerUps)
-                return;
-            while (world.Powerups.Count < NumofPowerUps)
+            Random random = new Random();
+            double i = random.Next(500, PowerUpDelay);
+            foreach (Powerup p in world.Powerups.Values)
             {
-                Powerup power = new Powerup(powerNum, new Vector2D(RandomCoordinate(), RandomCoordinate()));
-
-                while (collided(power, new Vector2D(0, 0)))
-                    power = new Powerup(powerNum, new Vector2D(RandomCoordinate(), RandomCoordinate()));
-
-                world.Powerups.Add(powerNum, power);
-                powerNum++;
+                if (!p.isDead())
+                    continue;
+                if (p.incrementPowerFrame() < i)
+                    continue;
+                p.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
+                while (collided(p, new Vector2D(0, 0)))
+                    p.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
+                p.revive();
+                Console.WriteLine("revived");
+                //p.resetPowerFrame();
             }
         }
 
@@ -447,12 +471,12 @@ namespace ServerController {
         /// <param name="tank"></param>
         private void RespawnTank(Tank tank)
         {
-            tank.Activate();
             tank.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
             while (collided(tank, new Vector2D(0, 0)))
             {
                 tank.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
             }
+            tank.Activate();
         }
 
         /// <summary>
@@ -636,6 +660,18 @@ namespace ServerController {
                                 NumofPowerUps = int.Parse(reader.Value);
                                 break;
 
+                            case "PowerUpDelay":
+                                reader.Read();
+                                PowerUpDelay = int.Parse(reader.Value);
+                                break;
+
+                            case "GameMode":
+                                reader.Read();
+                                Gamemode = bool.Parse(reader.Value);
+                                if (Gamemode)
+                                    cracked();
+                                break;
+
                             case "Wall":
                                 break;
 
@@ -691,6 +727,14 @@ namespace ServerController {
                     }
                 }
             }
+        }
+
+        private void cracked()
+        {
+            FramesPerShot = 3;
+            PowerUpRespawn = 1000;
+            NumofPowerUps = 10;
+            TankVelocity = 6;
         }
     }
 }

@@ -87,6 +87,7 @@ namespace Model
         public void Deactivate()
         {
             died = true;
+            hitPoints = 0;
             deadFrames = 0;
         }
         public bool IsDead()
@@ -227,6 +228,11 @@ namespace Model
         public void takePower()
         {
             power = false;
+        }
+
+        public void incrementScore()
+        {
+            score++;
         }
     }
 }

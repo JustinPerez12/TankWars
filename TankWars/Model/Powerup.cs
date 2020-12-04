@@ -17,6 +17,8 @@ namespace Model {
         [JsonProperty(PropertyName = "died")]
         private bool died;
 
+        private int frame;
+
         public Powerup()
         {
         }
@@ -45,6 +47,26 @@ namespace Model {
         public bool isDead()
         {
             return died;
+        }
+
+        public void resetPowerFrame()
+        {
+            frame = 0;
+        }
+
+        public int incrementPowerFrame()
+        {
+            return frame++;
+        }
+
+        public void revive()
+        {
+            died = false;
+        }
+
+        public void setLocation(Vector2D newLoc)
+        {
+            location = newLoc;
         }
 
     }

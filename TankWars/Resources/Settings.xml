@@ -9,6 +9,8 @@
   <TankVelocity>3</TankVelocity>
   <ProjectileVelocity>25</ProjectileVelocity>
   <NumofPowerUps>2</NumofPowerUps>
+  <PowerUpDelay>1650</PowerUpDelay>
+  <GameMode>true</GameMode>
 
 	<!-- top border -->
 	<Wall>

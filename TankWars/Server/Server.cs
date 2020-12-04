@@ -36,7 +36,6 @@ namespace Server
                 {
                     foreach (SocketState client in controller.Clients.Keys)
                     {
-                        controller.UpdateWorld(client);
                         controller.sendMessage(client);
                     }
                 }
@@ -61,7 +60,7 @@ namespace Server
                 return;
 
             Console.WriteLine("client connected");
-            state.OnNetworkAction = ReceiveMessageFromClient;
+            state.OnNetworkAction = RecieveStartupInfo;
             Console.WriteLine("sending");
             Networking.GetData(state);
         }
@@ -77,9 +76,14 @@ namespace Server
                 PlayerDisconnected(state);
                 return;
             }
+            controller.UpdateWorld(state);
+            Networking.GetData(state);
+        }
 
-            if(!controller.Clients.ContainsKey(state))//make sure hits once per client
-                controller.UpdateWorld(state);
+        private static void RecieveStartupInfo(SocketState state)
+        {
+            controller.UpdateWorld(state);
+            state.OnNetworkAction = ReceiveMessageFromClient;
             Networking.GetData(state);
         }
 
@@ -91,6 +95,7 @@ namespace Server
         {
             controller.Clients.TryGetValue(state, out int TankID);
             controller.world.Tanks.TryGetValue(TankID, out Tank tank);
+            tank.Deactivate();
             tank.SetDisconnect();
             controller.ClientName.Remove(state);
             controller.world.Tanks.Remove(TankID);
