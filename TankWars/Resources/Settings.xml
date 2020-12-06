@@ -10,7 +10,7 @@
   <ProjectileVelocity>25</ProjectileVelocity>
   <NumofPowerUps>2</NumofPowerUps>
   <PowerUpDelay>1650</PowerUpDelay>
-  <GameMode>true</GameMode>
+  <GameMode>false</GameMode>
 
 	<!-- top border -->
 	<Wall>
