@@ -80,6 +80,10 @@ namespace Server
             Networking.GetData(state);
         }
 
+        /// <summary>
+        /// This method is called the first time a client connects
+        /// </summary>
+        /// <param name="state"></param>
         private static void RecieveStartupInfo(SocketState state)
         {
             controller.UpdateWorld(state);
