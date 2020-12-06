@@ -61,7 +61,6 @@ namespace Server
 
             Console.WriteLine("client connected");
             state.OnNetworkAction = RecieveStartupInfo;
-            Console.WriteLine("sending");
             Networking.GetData(state);
         }
 

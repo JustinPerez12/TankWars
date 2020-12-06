@@ -245,7 +245,6 @@ namespace ServerController {
                     {
                         SendBeam(tank, turretDirection);
                         tank.takePower();
-                        Console.WriteLine("shot beam");
                         foreach (Tank t in world.Tanks.Values)
                         {
                             if (Intersects(tank.GetLocation(), turretDirection, t.GetLocation(), 30))
@@ -285,7 +284,6 @@ namespace ServerController {
             foreach (SocketState state in Clients.Keys)
             {
                 Networking.Send(state.TheSocket, JsonConvert.SerializeObject(beam) + "\n");
-                Console.WriteLine(JsonConvert.SerializeObject(beam));
             }
         }
 
@@ -443,8 +441,6 @@ namespace ServerController {
                 while (collided(p, new Vector2D(0, 0)))
                     p.setLocation(new Vector2D(RandomCoordinate(), RandomCoordinate()));
                 p.revive();
-                Console.WriteLine("revived");
-                //p.resetPowerFrame();
             }
         }
 
@@ -488,8 +484,8 @@ namespace ServerController {
             foreach (SocketState state in Clients.Keys)
             {
                 Networking.Send(state.TheSocket, JsonConvert.SerializeObject(tank) + "\n");
-                Console.WriteLine("disconnected");
             }
+            Console.WriteLine("player " + tank.getName() + " disconnected");
         }
 
         /// <summary>
